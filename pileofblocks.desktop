@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Pile of Blocks
+Comment=A block dropping game
+Exec=pileofblocks
+Icon=pileofblocks-logo.png
+Terminal=0
+Type=Application
+
