@@ -1,0 +1,11 @@
+mouseevent.lo: mouseevent.cpp /usr/include/guichan/mouseevent.hpp \
+ /usr/include/guichan/inputevent.hpp /usr/include/guichan/event.hpp \
+ /usr/include/guichan/platform.hpp
+
+/usr/include/guichan/mouseevent.hpp:
+
+/usr/include/guichan/inputevent.hpp:
+
+/usr/include/guichan/event.hpp:
+
+/usr/include/guichan/platform.hpp:

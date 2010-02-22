@@ -1,0 +1,29 @@
+<container name="top" width="640" height="480" basecolor="000000">
+        <label name="title" caption="Configuration" x="240" y="20" />
+
+        <label name="soundeffectvolumetitle" caption="Sound Effect Volume" x="240" y="60" />
+	<slider name="soundeffectvolumeslider" start="0" end="128" value="128" markerlength="128" steplength="128" x="240" y="80" width="300" height="10"/>
+
+        <label name="musicvolumetitle" caption="Music Volume" x="240" y="120" />
+	<slider name="musicvolumeslider" start="0" end="128" value="128" markerlength="128" steplength="128" x="240" y="140" width="300" height="10"/>
+
+
+        <label name="keyboard" caption="Keyboard" x="240" y="160" />
+        
+	<label name="lefttitle" caption="Left" x="240" y="180" />
+	<textfield name="lefttextfield" text="" x="320" y="180" width="120" height="16"/>
+
+	<label name="righttitle" caption="Right" x="240" y="200" />
+	<textfield name="righttextfield" text=""  x="320" y="200" width="120" height="16"/>
+
+	<label name="downtitle" caption="Down" x="240" y="220" />
+	<textfield name="downtextfield" text=""  x="320" y="220" width="120" height="16"/>
+
+	<label name="rotatetitle" caption="Rotate" x="240" y="240" />
+	<textfield name="rotatetextfield" text=""  x="320" y="240" width="120" height="16"/>
+
+        <label x="240" y="280" name="backlabel" caption="Back" />
+        <label x="300" y="280" name="applylabel" caption="Apply" />
+
+</container>
+

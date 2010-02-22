@@ -1,0 +1,26 @@
+This package was debianized by aaronsantos <aaronsantos@unknown> on
+Wed, 17 Feb 2010 00:11:45 -0800.
+
+It was downloaded from unknown
+
+Upstream Author(s):
+
+    Aaron Santos aaronds109@gmail.com
+
+Copyright:
+
+    Copyright (C) 2010 Aaron Santos
+
+License:
+
+    CC3.0-BY
+
+The Debian packaging is:
+
+    Copyright (C) 2010 aaronsantos <aaronsantos@unknown>
+
+and is licensed under the GPL version 3, 
+see `/usr/share/common-licenses/GPL-3'.
+
+# Please also look if there are files or directories which have a
+# different copyright/license attached and list them here.

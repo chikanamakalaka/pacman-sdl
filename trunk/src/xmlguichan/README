@@ -1,0 +1,14 @@
+This is a guichan addon to support loading widgets from xml file.
+
+Copyright (C) 2006 quard <quard8@gmail.com>
+All rights reserved.
+
+If you use this package in your application I would love
+to know about it. Feel free to drop a mail!
+
+More information you can find at http://quard.5gigs.com
+
+<chris@chris-camacho.com> 2007/09/14 changed a few things to make it
+compile with latest svn of guichan and added a makefile
+
+

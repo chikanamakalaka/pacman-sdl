@@ -1,0 +1,13 @@
+<container name="top" width="640" height="480">
+    <icon name="logo" image="/usr/local/games/pileofblocks/images/mainmenubackground.png" />
+    
+	<label name="title" caption="Main Menu" x="300" y="220" />
+	
+	<label name="newgamelabel" caption="New Game" x="300" y="250" />
+	<label name="highscoreslabel" caption="High Scores" x="300" y="270" />
+	<label name="creditslabel" caption="Credits" x="300" y="290" />
+	<label name="configurationlabel" caption="Configuration" x="300" y="310" />
+	<label name="quitlabel" caption="Quit" x="300" y="330" />
+	
+
+</container>
