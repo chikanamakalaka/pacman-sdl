@@ -1,0 +1,8 @@
+inputevent.lo: inputevent.cpp /usr/include/guichan/inputevent.hpp \
+ /usr/include/guichan/event.hpp /usr/include/guichan/platform.hpp
+
+/usr/include/guichan/inputevent.hpp:
+
+/usr/include/guichan/event.hpp:
+
+/usr/include/guichan/platform.hpp:

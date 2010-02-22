@@ -1,0 +1,19 @@
+<container name="top" width="640" height="480" basecolor="000000">
+    
+	<label name="title" caption="HighScores" x="280" y="20" />
+	
+	<label name="highscore0" caption="No high scores yet" x="240" y="40" width="400" />
+	<label name="highscore1" caption="" x="240" y="60" width="400" />
+	<label name="highscore2" caption="" x="240" y="80" width="400" />
+	<label name="highscore3" caption="" x="240" y="100" width="400" />
+	<label name="highscore4" caption="" x="240" y="120" width="400" />
+	<label name="highscore5" caption="" x="240" y="140" width="400" />
+	<label name="highscore6" caption="" x="240" y="160" width="400" />
+	<label name="highscore7" caption="" x="240" y="180" width="400" />
+	<label name="highscore8" caption="" x="240" y="200" width="400" />
+	<label name="highscore9" caption="" x="240" y="220" width="400" />
+	
+	<label name="continue" caption="Back to main menu" x="240" y="430" />
+	
+
+</container>

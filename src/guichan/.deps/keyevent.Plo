@@ -1,0 +1,13 @@
+keyevent.lo: keyevent.cpp /usr/include/guichan/keyevent.hpp \
+ /usr/include/guichan/inputevent.hpp /usr/include/guichan/event.hpp \
+ /usr/include/guichan/platform.hpp /usr/include/guichan/key.hpp
+
+/usr/include/guichan/keyevent.hpp:
+
+/usr/include/guichan/inputevent.hpp:
+
+/usr/include/guichan/event.hpp:
+
+/usr/include/guichan/platform.hpp:
+
+/usr/include/guichan/key.hpp:

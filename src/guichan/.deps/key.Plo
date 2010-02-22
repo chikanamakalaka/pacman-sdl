@@ -1,0 +1,6 @@
+key.lo: key.cpp /usr/include/guichan/key.hpp \
+ /usr/include/guichan/platform.hpp
+
+/usr/include/guichan/key.hpp:
+
+/usr/include/guichan/platform.hpp:

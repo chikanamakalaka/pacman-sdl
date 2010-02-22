@@ -1,0 +1,11 @@
+<container name="top" width="640" height="480" basecolor="000000">
+
+	<label name="scorelabel" caption="score" x="280" y="220" />
+	<label name="score" caption="" x="340" y="220" width="100" height="20" />
+    
+	<label name="namelabel" caption="name" x="280" y="240" />
+	<textfield name="name" text="" x="340" y="240"  width="100" height="20" />
+
+  <label name="continue" caption="Continue" x="320" y="280" />
+
+</container>

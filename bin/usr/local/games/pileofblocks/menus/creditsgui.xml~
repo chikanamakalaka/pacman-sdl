@@ -1,0 +1,19 @@
+<container name="top" width="640" height="480" basecolor="000000">
+    
+	<label name="title" caption="Credits" x="240" y="20" />
+	
+	<label name="" caption="Designed and programmed by Aaron Santos" x="40" y="60" />
+	
+	<label name="" caption="Music by shalpin (OpenGameArt.org user)" x="40" y="100" />
+	<label name="" caption="Sound effects by " x="40" y="140" />
+	<label name="" caption="Lokif" x="40" y="160" />
+	<label name="" caption="Iwan Gabovitch" x="40" y="180" />
+	<label name="" caption="Independent.nu, bart (OpenGameArt.org user)" x="40" y="200" />
+	<label name="" caption="Tested by" x="40" y="240" />
+	<label name="" caption="Stephanie Cox" x="40" y="260" />
+	<label name="" caption="Nicholas Santos" x="40" y="280" />
+	
+	<label name="continue" caption="Back to main menu" x="240" y="430" />
+	
+
+</container>
