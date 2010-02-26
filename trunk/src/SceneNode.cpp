@@ -80,6 +80,11 @@ SceneNode& SceneNode::CreateChildNode(const std::string& name){
 	children.push_back(scenenode);
 	return *scenenode;
 }
+SceneNodePtr SceneNode::CreateChildNodePtr(const std::string& name){
+	SceneNodePtr scenenode = SceneNodePtr(new SceneNode(name, scenegraph));
+	children.push_back(scenenode);
+	return scenenode;
+}
 
 void SceneNode::AddChildNode(SceneNodePtr scenenode){
 	children.push_back(scenenode);
