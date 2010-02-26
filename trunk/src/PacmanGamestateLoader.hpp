@@ -12,7 +12,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <boost/mpl/list.hpp>
-
+#include "xmlguichan/tinyxml.h"
 class TetrisGamestateLoader{
 public:
 	SignalBroker& signalbroker;
@@ -774,5 +774,102 @@ public:
 	}
 
 private:
+	SceneGraph& LoadSceneGraphFromFile(const std::string& path){
+		std::string name = "";
+		SceneGraph& scenegraph = scenegraphcontroller->CreateSceneGraph("Tetris");
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created scenegraph: Tetris");
 
+		SceneNode& root = scenegraph.GetRoot();
+
+
+		boost::shared_ptr<TriangleStrip> block(new TriangleStrip(false));
+		//create block geometry
+		block->AddVertex(Vertex(0,0,1, 0,0));
+		block->AddVertex(Vertex(24,0,1, 1,0));
+		block->AddVertex(Vertex(0,24,1, 0,1));
+		block->AddVertex(Vertex(24,24,1, 1,1));
+
+		TiXmlDocument document(path);
+		const TiXmlElement* level = document.FirstChildElement("level");
+
+		if(level){
+
+			const std::string* id = level->Attribute("id");
+			SceneNode& levelnode = root.CreateChildNode(id?*id:"");
+
+			const TiXmlElement* layers = level->FirstChildElement("layers");
+			if(layers){
+				const TiXmlElement* layer = layers->FirstChildElement("layer");
+				while(layer){
+
+					const std::string* id = layer->Attribute("id");
+					SceneNode& layernode = levelnode.CreateChildNode(id?*id:"");
+
+					const TiXmlElement* element = layer->FirstChildElement();
+					while(element){
+
+						if(element->Value()=="spritegrid"){
+							const std::string* id = element->Attribute("id");
+							SceneNode& spritegridnode = layernode.CreateChildNode(id?*id:"");
+
+							TiXmlElement* spritecell = element->FirstChildElement("spritecell");
+							while(spritecell){
+								const std::string* id = spritecell->Attribute("id");
+								SceneNode& spritecellnode = spritegridnode.CreateChildNode(id?*id:"");
+
+								spritecellnode.AddSceneNodeProperty("geometry", boost::shared_ptr<GeometryProperty>(new GeometryProperty(block)));
+								spritecellnode.AddSceneNodeProperty("texture", boost::shared_ptr<TextureProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/redblock.png"))));
+								PositionProperty& positionproperty = spritecellnode.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
+								Matrix4& m = positionproperty.GetPosition();
+								//[row, column]
+								m(0,3) = 0.0f;
+								m(1,3) = 0.0f;
+
+								spritecell = spritecell->NextSiblingElement("spritecell");
+							}
+						}
+						element = element->NextSiblingElement();
+					}
+					layer = layer->NextSiblingElement("layer");
+				}
+			}
+
+			const TiXmlElement* spritesheets = level->FirstChildElement("spritesheets");
+			if(spritesheets){
+				const TiXmlElement* spritesheet = spritesheets->FirstChildElement("spritesheet");
+				while(spritesheet){
+					const TiXmlElement* sprite = spritesheet->FirstChildElement("sprite");
+					while(sprite){
+
+						sprite = sprite->NextSiblingElement("sprite");
+					}
+					spritesheet = spritesheet->NextSiblingElement("spritesheet");
+				}
+
+
+			}
+
+			const TiXmlElement* characters = level->FirstChildElement("characters");
+			if(characters){
+				const TiXmlElement* character = characters->FirstChildElement();
+				while(character){
+					if(character->Value()=="playercharacter"){
+						const TiXmlElement* animations = character->FirstChildElement("animations");
+						if(animations)
+						{
+
+						}
+					}else if(character->Value()=="nonplayercharacter"){
+						const TiXmlElement* animations = character->FirstChildElement("animations");
+						if(animations)
+						{
+
+						}
+					}
+
+					character = character->NextSiblingElement();
+				}
+			}
+		}
+	}
 };
