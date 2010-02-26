@@ -77,6 +77,7 @@ public:
 
 	//Child / descendant CRUD
 	SceneNode& CreateChildNode(const std::string& name);
+	SceneNodePtr CreateChildNodePtr(const std::string& name);
 	void AddChildNode(SceneNodePtr scenenode);
 	void DeleteChildNode(SceneNodePtr scenenode);
 

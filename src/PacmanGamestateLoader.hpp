@@ -782,13 +782,6 @@ private:
 		SceneNode& root = scenegraph.GetRoot();
 
 
-		boost::shared_ptr<TriangleStrip> block(new TriangleStrip(false));
-		//create block geometry
-		block->AddVertex(Vertex(0,0,1, 0,0));
-		block->AddVertex(Vertex(24,0,1, 1,0));
-		block->AddVertex(Vertex(0,24,1, 0,1));
-		block->AddVertex(Vertex(24,24,1, 1,1));
-
 		TiXmlDocument document(path);
 		const TiXmlElement* level = document.FirstChildElement("level");
 
@@ -797,6 +790,53 @@ private:
 			const std::string* id = level->Attribute("id");
 			SceneNode& levelnode = root.CreateChildNode(id?*id:"");
 
+			std::map<std::string, boost::shared_ptr<SceneNodeProperty> > textures;
+
+			std::map<std::string, SceneNode::SceneNodePtr> sprites;
+
+			(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/white.png"))));
+
+			//Load all sprites
+			const TiXmlElement* spritesheets = level->FirstChildElement("spritesheets");
+			if(spritesheets){
+				
+				SceneNode& spritesheetsnode = root.CreateChildNode("spritesheets");
+				const TiXmlElement* spritesheet = spritesheets->FirstChildElement("spritesheet");
+				while(spritesheet){
+					const std::string* id = layer->Attribute("id");
+					const std::string* filepath = layer->Attribute("filepath");
+					if(filepath){
+						SceneNode& spritesheetnode = spritesheetsnode.CreateChildNode(id?*id:"");
+
+						const TiXmlElement* sprite = spritesheet->FirstChildElement("sprite");
+						while(sprite){
+							const std::string* id = layer->Attribute("id");
+							if(id){
+								SceneNode::SceneNodePtr spritenode = spritesheetnode.CreateChildNodePtr(*id);
+
+								//TODO: sprite texture coords
+								boost::shared_ptr<TriangleStrip> sprite(new TriangleStrip(false));
+								//create sprite geometry
+								sprite->AddVertex(Vertex(0,0,1, 0,0));
+								sprite->AddVertex(Vertex(24,0,1, 1,0));
+								sprite->AddVertex(Vertex(0,24,1, 0,1));
+								sprite->AddVertex(Vertex(24,24,1, 1,1));
+
+								//TODO: width height
+								spritenode->AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(sprite)));
+								spritenode->AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath(*filepath))));
+
+								sprites[*id]=spritenode;
+							}
+
+							sprite = sprite->NextSiblingElement("sprite");
+						}
+					}
+					spritesheet = spritesheet->NextSiblingElement("spritesheet");
+				}
+			}
+
+			//Load layers
 			const TiXmlElement* layers = level->FirstChildElement("layers");
 			if(layers){
 				const TiXmlElement* layer = layers->FirstChildElement("layer");
@@ -815,16 +855,18 @@ private:
 							TiXmlElement* spritecell = element->FirstChildElement("spritecell");
 							while(spritecell){
 								const std::string* id = spritecell->Attribute("id");
-								SceneNode& spritecellnode = spritegridnode.CreateChildNode(id?*id:"");
+								const std::string* spriteid = spritecell->Attribute("spriteid");
+								if(spriteid){
+									SceneNode::SceneNodePtr spritenode = sprites[*spriteid];
+									//SceneNode& spritecellnode = spritegridnode.CreateChildNode(id?*id:"");
 
-								spritecellnode.AddSceneNodeProperty("geometry", boost::shared_ptr<GeometryProperty>(new GeometryProperty(block)));
-								spritecellnode.AddSceneNodeProperty("texture", boost::shared_ptr<TextureProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/redblock.png"))));
-								PositionProperty& positionproperty = spritecellnode.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-								Matrix4& m = positionproperty.GetPosition();
-								//[row, column]
-								m(0,3) = 0.0f;
-								m(1,3) = 0.0f;
-
+									//TODO: clone?
+									spritegridnode.AddChildNode(spritenode);
+									//TODO: position spritecell in the grid
+									//[row, column]
+									//m(0,3) = 0.0f;
+									//m(1,3) = 0.0f;
+								}
 								spritecell = spritecell->NextSiblingElement("spritecell");
 							}
 						}
@@ -834,21 +876,7 @@ private:
 				}
 			}
 
-			const TiXmlElement* spritesheets = level->FirstChildElement("spritesheets");
-			if(spritesheets){
-				const TiXmlElement* spritesheet = spritesheets->FirstChildElement("spritesheet");
-				while(spritesheet){
-					const TiXmlElement* sprite = spritesheet->FirstChildElement("sprite");
-					while(sprite){
-
-						sprite = sprite->NextSiblingElement("sprite");
-					}
-					spritesheet = spritesheet->NextSiblingElement("spritesheet");
-				}
-
-
-			}
-
+			//Load characters
 			const TiXmlElement* characters = level->FirstChildElement("characters");
 			if(characters){
 				const TiXmlElement* character = characters->FirstChildElement();
