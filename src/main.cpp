@@ -3,7 +3,7 @@
 // Author      : Aaron
 // Version     :
 // Copyright   :
-// Description : Tetris
+// Description : Pacman
 //============================================================================
 
 #include <iostream>
@@ -48,7 +48,7 @@
 #include "TetrisEnterNameGUIController.hpp"
 #include "TetrisLogic.hpp"
 #include "TetrisHighScoresGUIController.hpp"
-#include "TetrisGamestateLoader.hpp"
+#include "PacmanGamestateLoader.hpp"
 #include "SDLTetrisAudio.hpp"
 #include "TetrisMainMenuController.hpp"
 #include "TetrisConfigurationMenuController.hpp"
