@@ -7,10 +7,10 @@
 
 
 #if defined(linux)
-	#include <GL/gl.h>
 	#ifndef GL_GLEXT_PROTOTYPES
-		#define GL_GLEXT_PROTOTYPES 1
+		#define GL_GLEXT_PROTOTYPES
 	#endif
+	#include <GL/gl.h>
 	#include <GL/glext.h>
 #endif
 
@@ -250,7 +250,7 @@ public:
 };
 
 
-#ifndef GL_VERSION_1_5
+#ifdef GL_VERSION_1_5
 class VBO: public IRenderable{
 private:
 	GLuint colorBuffer;
@@ -265,9 +265,13 @@ private:
 	GLuint textureCoordBuffer;
 	GLuint textureCoordBufferSize;
 
+	GLuint numvertices;
+
 	GLenum usageMode;
 public:
-	VBO(GLuint colorBufferSize, void* colorData, GLuint normalBufferSize, void* normalData, GLuint vertexBufferSize, void* vertexData, GLuint textureCoordBufferSize, void* textureCoordData, GLenum usageMode){
+	VBO(GLuint numvertices, GLuint colorBufferSize, void* colorData, GLuint normalBufferSize, void* normalData, GLuint vertexBufferSize, void* vertexData, GLuint textureCoordBufferSize, void* textureCoordData, GLenum usageMode):
+		numvertices(numvertices){
+
 			glGenBuffers(1, &colorBuffer);
 			glGenBuffers(1, &normalBuffer);
 			glGenBuffers(1, &vertexBuffer);
@@ -275,50 +279,86 @@ public:
 
 
 			this->usageMode = usageMode;
-
-			this->colorBufferSize = colorBufferSize;
-			glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-			glBufferData(GL_ARRAY_BUFFER, colorBufferSize, colorData, usageMode);
-
-			this->normalBufferSize = normalBufferSize;
-			glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
-			glBufferData(GL_ARRAY_BUFFER, normalBufferSize, normalData, usageMode);
-
-			this->vertexBufferSize = vertexBufferSize;
-			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-			glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, vertexData, usageMode);
-
-			this->textureCoordBufferSize = textureCoordBufferSize;
-			glBindBuffer(GL_ARRAY_BUFFER, textureCoordBuffer);
-			glBufferData(GL_ARRAY_BUFFER, textureCoordBufferSize, textureCoordData, usageMode);
+			if(colorBufferSize > 0){
+				this->colorBufferSize = colorBufferSize;
+				glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+				glBufferData(GL_ARRAY_BUFFER, colorBufferSize, colorData, usageMode);
+			}
+			if(normalBufferSize > 0){
+				this->normalBufferSize = normalBufferSize;
+				glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+				glBufferData(GL_ARRAY_BUFFER, normalBufferSize, normalData, usageMode);
+			}
+			if(vertexBufferSize > 0){
+				this->vertexBufferSize = vertexBufferSize;
+				glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+				glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, vertexData, usageMode);
+			}
+			if(textureCoordBufferSize > 0){
+				this->textureCoordBufferSize = textureCoordBufferSize;
+				glBindBuffer(GL_ARRAY_BUFFER, textureCoordBuffer);
+				glBufferData(GL_ARRAY_BUFFER, textureCoordBufferSize, textureCoordData, usageMode);
+			}
 		}
-	virtual ~VBO(){
-		/*glBindBuffer(GL_ARRAY_BUFFER, 0);
+	/*virtual ~VBO(){
+		/glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glDeleteBuffers(1, &colorBuffer);
 		glDeleteBuffers(1, &normalBuffer);
 		glDeleteBuffers(1, &vertexBuffer);
-		glDeleteBuffers(1, &textureCoordBuffer);*/
+		glDeleteBuffers(1, &textureCoordBuffer);/
+	}*/
+
+	boost::shared_ptr<IRenderable> Clone()const{
+		return boost::shared_ptr<IRenderable>(new VBO(*this));
 	}
-	void Render()const{
-		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-		glColorPointer(3, GL_UNSIGNED_BYTE, 0, 0);
+	boost::shared_ptr<VBO> ConcreteClone()const{
+		return boost::shared_ptr<VBO>(new VBO(*this));
+	}
+	virtual void Render()const{
+		if(this->IsVisible()){
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			if(colorBufferSize > 0){
+				glEnableClientState(GL_COLOR_ARRAY);
+				glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+				glColorPointerEXT(3, GL_UNSIGNED_BYTE, 0, 0, 0);
+			}
 
-		/*glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
-		glNormalPointer(3, GL_FLOAT, 0, 0);*/
+			if(normalBufferSize > 0){
+				glEnableClientState(GL_NORMAL_ARRAY);
+				glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+				glNormalPointerEXT(3, GL_FLOAT, 0, 0);
+			}
 
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glVertexPointer(3, GL_FLOAT, 0, 0);
+			if(textureCoordBufferSize > 0){
+				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				glBindBuffer(GL_ARRAY_BUFFER, textureCoordBuffer);
+				glTexCoordPointerEXT(2, GL_FLOAT, 0, 0, 0);
+			}
 
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_COLOR_ARRAY);
+			if(vertexBufferSize > 0){
+				glEnableClientState(GL_VERTEX_ARRAY);
+				glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+				glVertexPointer(3, GL_FLOAT, 0, 0);
 
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexBufferSize/3);
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, numvertices);
+			}
 
 
-		glDisableClientState(GL_COLOR_ARRAY);
-		glDisableClientState(GL_VERTEX_ARRAY);
+			if(colorBufferSize > 0){
+				glDisableClientState(GL_COLOR_ARRAY);
+			}
+			if(normalBufferSize > 0){
+				glDisableClientState(GL_NORMAL_ARRAY);
+			}
+			if(vertexBufferSize > 0){
+				glDisableClientState(GL_VERTEX_ARRAY);
+			}
+			if(textureCoordBufferSize > 0){
+				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			}
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
 	}
 };
 
@@ -326,17 +366,20 @@ public:
 class VBOFactory{
 public:
 	VBOFactory(){}
-	VBO CreateFromTriangleStrip(const TriangleStrip& trianglestrip){
+	boost::shared_ptr<IRenderable> CreateFromTriangleStrip(const TriangleStrip& trianglestrip){
 		const std::list<Vertex>& vertices = trianglestrip.GetVertices();
-		GLuint vertexBufferSize = vertices.size();
+		GLuint vertexBufferSize = sizeof(GLfloat)*3*vertices.size();
 		GLfloat* vertexData = new GLfloat[vertices.size()*3];
 		std::list<Vertex>::const_iterator itr = vertices.begin();
-		for(unsigned int i=0; i<vertexBufferSize && itr!=vertices.end(); i+=3, itr++){
+		for(unsigned int i=0; itr!=vertices.end(); i+=3, itr++){
 			vertexData[i]=itr->GetX();
 			vertexData[i+1]=itr->GetY();
 			vertexData[i+2]=itr->GetZ();
 		}
-		return VBO(0, 0, 0, 0, vertexBufferSize, vertexData, 0, 0, GL_STATIC_DRAW);
+
+		boost::shared_ptr<VBO> vbo(new VBO(vertices.size(), 0, 0, 0, 0, vertexBufferSize, vertexData, 0, 0, GL_STATIC_DRAW));
+		//delete[] vertexData;
+		return vbo;
 	}
 };
 #endif //defined(GL_VERSION_1_5)

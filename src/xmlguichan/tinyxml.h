@@ -396,6 +396,11 @@ class TiXmlElement : public TiXmlNode
 	*/
 	const std::string* Attribute( const std::string& name, int* i ) const;
 
+	/** Given an attribute name, attribute returns the value
+		for the attribute of that name, or null if none exists.
+	*/
+	const std::string* Attribute( const std::string& name, float* i ) const;
+
 	/** Sets an attribute of name to a given value. The attribute
 		will be created if it does not exist, or changed if it does.
 	*/

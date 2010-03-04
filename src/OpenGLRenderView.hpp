@@ -21,6 +21,7 @@ private:
 	bool openglscenenodeprocessorregistered;
 
 	OpenGL::DisplayListFactory displaylistfactory;
+	OpenGL::VBOFactory vbofactory;
 	TextureFactory<OpenGL::Texture> texturefactory;
 public:
 	OpenGLRenderView(SignalBroker& signalbroker):
@@ -70,8 +71,11 @@ protected:
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Enabling 2D textures.");
 			glEnable( GL_TEXTURE_2D );
 
+			glEnable(GL_VERTEX_ARRAY);
+			glEnable(GL_TEXTURE_COORD_ARRAY);
+
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Changing clear color.");
-			glClearColor( 0.0f, 0.0f, 1.0f, 0.0f );
+			glClearColor( 1.0f, 1.0f, 1.0f, 0.0f );
 
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Setting up viewport.");
 			glViewport( 0, 0, 640, 480 );
@@ -114,7 +118,7 @@ protected:
 		}
 	}
 	void BeginRender(SceneGraph& scenegraph){
-		glClearColor( 0.0f, 0.0f, 1.0f, 0.0f );
+		glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
 		glClear( GL_COLOR_BUFFER_BIT );
 	}
 	void Render(SceneGraph& scenegraph){
@@ -141,14 +145,18 @@ protected:
 			Geometry& geometry = scenenode.GetSceneNodeProperty<GeometryProperty>("geometry").GetGeometry();
 			//PositionProperty& positionproperty scenenode.GetSceneNodeProperty<PositionProperty>("position");
 			const TriangleStrip& trianglestrip = dynamic_cast<const TriangleStrip&>(geometry);
-			///VBOFactory vbofactory;
-			//VBO vbo = vbofactory.CreateFromTriangleStrip(trianglestrip);
-			//scenenode.AddSceneNodeProperty("openglvbo", new RenderableProperty(vbo));
+
 
 			boost::shared_ptr<ITexture> texture = texturefactory.LoadFromFilePath(scenenode.GetSceneNodeProperty<TextureProperty>("texture").GetPathToTexture());
 
-			boost::shared_ptr<IRenderable> displaylist = displaylistfactory.CreateFromTriangleStrip(trianglestrip);
-			scenenode.AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(displaylist, texture)));
+			if(true){
+				boost::shared_ptr<IRenderable> vbo = vbofactory.CreateFromTriangleStrip(trianglestrip);
+				scenenode.AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(vbo, texture)));
+
+			}else{
+			//boost::shared_ptr<IRenderable> displaylist = displaylistfactory.CreateFromTriangleStrip(trianglestrip);
+			//scenenode.AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(displaylist, texture)));
+			}
 		}
 
 	}

@@ -384,6 +384,15 @@ const std::string* TiXmlElement::Attribute( const std::string& name, int* i ) co
 	return s;
 }
 
+const std::string* TiXmlElement::Attribute( const std::string& name, float* f ) const
+{
+	const std::string* s = Attribute( name );
+	if ( s )
+		*f = atof( s->c_str() );
+	else
+		*f = 0;
+	return s;
+}
 
 void TiXmlElement::SetAttribute( const std::string& name, int val )
 {	
