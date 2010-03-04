@@ -254,59 +254,20 @@ public:
 class VBO: public IRenderable{
 private:
 	GLuint colorBuffer;
-	GLuint colorBufferSize;
-
 	GLuint normalBuffer;
-	GLuint normalBufferSize;
-
 	GLuint vertexBuffer;
-	GLuint vertexBufferSize;
-
 	GLuint textureCoordBuffer;
-	GLuint textureCoordBufferSize;
-
 	GLuint numvertices;
-
-	GLenum usageMode;
 public:
-	VBO(GLuint numvertices, GLuint colorBufferSize, void* colorData, GLuint normalBufferSize, void* normalData, GLuint vertexBufferSize, void* vertexData, GLuint textureCoordBufferSize, void* textureCoordData, GLenum usageMode):
-		numvertices(numvertices){
+	VBO(GLuint numvertices, GLuint colorBuffer, GLuint normalBuffer, GLuint vertexBuffer, GLuint textureCoordBuffer):
+		numvertices(numvertices),
+		colorBuffer(colorBuffer),
+		normalBuffer(normalBuffer),
+		vertexBuffer(vertexBuffer),
+		textureCoordBuffer(textureCoordBuffer)
+		{
 
-			glGenBuffers(1, &colorBuffer);
-			glGenBuffers(1, &normalBuffer);
-			glGenBuffers(1, &vertexBuffer);
-			glGenBuffers(1, &textureCoordBuffer);
-
-
-			this->usageMode = usageMode;
-			if(colorBufferSize > 0){
-				this->colorBufferSize = colorBufferSize;
-				glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-				glBufferData(GL_ARRAY_BUFFER, colorBufferSize, colorData, usageMode);
-			}
-			if(normalBufferSize > 0){
-				this->normalBufferSize = normalBufferSize;
-				glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
-				glBufferData(GL_ARRAY_BUFFER, normalBufferSize, normalData, usageMode);
-			}
-			if(vertexBufferSize > 0){
-				this->vertexBufferSize = vertexBufferSize;
-				glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-				glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, vertexData, usageMode);
-			}
-			if(textureCoordBufferSize > 0){
-				this->textureCoordBufferSize = textureCoordBufferSize;
-				glBindBuffer(GL_ARRAY_BUFFER, textureCoordBuffer);
-				glBufferData(GL_ARRAY_BUFFER, textureCoordBufferSize, textureCoordData, usageMode);
-			}
 		}
-	/*virtual ~VBO(){
-		/glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDeleteBuffers(1, &colorBuffer);
-		glDeleteBuffers(1, &normalBuffer);
-		glDeleteBuffers(1, &vertexBuffer);
-		glDeleteBuffers(1, &textureCoordBuffer);/
-	}*/
 
 	boost::shared_ptr<IRenderable> Clone()const{
 		return boost::shared_ptr<IRenderable>(new VBO(*this));
@@ -317,25 +278,25 @@ public:
 	virtual void Render()const{
 		if(this->IsVisible()){
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			if(colorBufferSize > 0){
+			/*if(colorBuffer > 0){
 				glEnableClientState(GL_COLOR_ARRAY);
 				glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 				glColorPointerEXT(3, GL_UNSIGNED_BYTE, 0, 0, 0);
 			}
 
-			if(normalBufferSize > 0){
+			if(normalBuffer > 0){
 				glEnableClientState(GL_NORMAL_ARRAY);
 				glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
 				glNormalPointerEXT(3, GL_FLOAT, 0, 0);
-			}
+			}*/
 
-			if(textureCoordBufferSize > 0){
+			if(textureCoordBuffer > 0){
 				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 				glBindBuffer(GL_ARRAY_BUFFER, textureCoordBuffer);
 				glTexCoordPointerEXT(2, GL_FLOAT, 0, 0, 0);
 			}
 
-			if(vertexBufferSize > 0){
+			if(vertexBuffer > 0){
 				glEnableClientState(GL_VERTEX_ARRAY);
 				glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 				glVertexPointer(3, GL_FLOAT, 0, 0);
@@ -344,17 +305,17 @@ public:
 			}
 
 
-			if(colorBufferSize > 0){
+			if(colorBuffer > 0){
 				glDisableClientState(GL_COLOR_ARRAY);
 			}
-			if(normalBufferSize > 0){
+			if(normalBuffer > 0){
 				glDisableClientState(GL_NORMAL_ARRAY);
 			}
-			if(vertexBufferSize > 0){
+			if(vertexBuffer > 0){
 				glDisableClientState(GL_VERTEX_ARRAY);
 			}
-			if(textureCoordBufferSize > 0){
-				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			if(textureCoordBuffer > 0){
+				glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 			}
 
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -368,17 +329,67 @@ public:
 	VBOFactory(){}
 	boost::shared_ptr<IRenderable> CreateFromTriangleStrip(const TriangleStrip& trianglestrip){
 		const std::list<Vertex>& vertices = trianglestrip.GetVertices();
-		GLuint vertexBufferSize = sizeof(GLfloat)*3*vertices.size();
+
+		GLuint colorBuffer;
+		GLuint colorBufferSize;
+
+		GLuint normalBuffer;
+		GLuint normalBufferSize;
+
+		GLuint vertexBuffer;
+		GLuint vertexBufferSize;
+
+		GLuint textureCoordBuffer;
+		GLuint textureCoordBufferSize;
+
+		GLuint numvertices;
+
+		vertexBufferSize = sizeof(GLfloat)*3*vertices.size();
 		GLfloat* vertexData = new GLfloat[vertices.size()*3];
+
+		textureCoordBuffer = sizeof(GLfloat)*2*vertices.size();
+		GLfloat* textureCoordData = new GLfloat[vertices.size()*2];
+
+
+		//glGenBuffers(1, &colorBuffer);
+		//glGenBuffers(1, &normalBuffer);
+		glGenBuffers(1, &vertexBuffer);
+		glGenBuffers(1, &textureCoordBuffer);
+
+
+
 		std::list<Vertex>::const_iterator itr = vertices.begin();
-		for(unsigned int i=0; itr!=vertices.end(); i+=3, itr++){
+		for(unsigned int i=0, j=0; itr!=vertices.end(); i+=3, j+=2, itr++){
 			vertexData[i]=itr->GetX();
 			vertexData[i+1]=itr->GetY();
 			vertexData[i+2]=itr->GetZ();
+
+			textureCoordData[j]=itr->GetTextureU();
+			textureCoordData[j+1]=itr->GetTextureV();
 		}
 
-		boost::shared_ptr<VBO> vbo(new VBO(vertices.size(), 0, 0, 0, 0, vertexBufferSize, vertexData, 0, 0, GL_STATIC_DRAW));
-		//delete[] vertexData;
+
+		/*if(colorBufferSize > 0){
+			this->colorBufferSize = colorBufferSize;
+			glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+			glBufferData(GL_ARRAY_BUFFER, colorBufferSize, colorData, usageMode);
+		}
+		if(normalBufferSize > 0){
+			this->normalBufferSize = normalBufferSize;
+			glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+			glBufferData(GL_ARRAY_BUFFER, normalBufferSize, normalData, usageMode);
+		}*/
+
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, vertexData, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, textureCoordBuffer);
+		glBufferData(GL_ARRAY_BUFFER, textureCoordBufferSize, textureCoordData, GL_STATIC_DRAW);
+
+
+		boost::shared_ptr<VBO> vbo(new VBO(vertices.size(), 0, 0, vertexBuffer, textureCoordBuffer));
+		delete[] vertexData;
+		delete[] textureCoordData;
 		return vbo;
 	}
 };
