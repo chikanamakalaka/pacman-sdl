@@ -88,6 +88,7 @@ public:
 	void MoveChildNodeToTargetParent(SceneNodePtr scenenode, SceneNode& target);
 
 	void DeleteChildNodes();
+	void DeleteChildNodeByName(const std::string& name);
 
 	const SceneNode& GetChildNodeByName(const std::string& name)const;
 	SceneNode& GetChildNodeByName(const std::string& name);

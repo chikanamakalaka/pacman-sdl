@@ -80,7 +80,7 @@ SceneNode& SceneNode::CreateChildNode(const std::string& name){
 	children.push_back(scenenode);
 	return *scenenode;
 }
-SceneNodePtr SceneNode::CreateChildNodePtr(const std::string& name){
+SceneNode::SceneNodePtr SceneNode::CreateChildNodePtr(const std::string& name){
 	SceneNodePtr scenenode = SceneNodePtr(new SceneNode(name, scenegraph));
 	children.push_back(scenenode);
 	return scenenode;
@@ -91,6 +91,13 @@ void SceneNode::AddChildNode(SceneNodePtr scenenode){
 }
 void SceneNode::DeleteChildNode(SceneNodePtr scenenode){
 	children.remove(scenenode);
+}
+void SceneNode::DeleteChildNodeByName(const std::string& name){
+	try{
+		DeleteChildNode(GetChildNodePtrByName(name));
+	}catch(...){
+
+	}
 }
 SceneNode::SceneNodes& SceneNode::GetChildNodes(){
 	return children;

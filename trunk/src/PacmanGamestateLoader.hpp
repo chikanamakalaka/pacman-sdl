@@ -1,5 +1,5 @@
 /*
- * TetrisGamestateLoader
+ * PacmanGamestateLoader
  *
  *  Created on: May 5, 2009
  *      Author: asantos
@@ -13,7 +13,7 @@
 
 #include <boost/mpl/list.hpp>
 #include "xmlguichan/tinyxml.h"
-class TetrisGamestateLoader{
+class PacmanGamestateLoader{
 public:
 	SignalBroker& signalbroker;
 private:
@@ -137,7 +137,7 @@ private:
 	TetrisStateMachine tetrisstatemachine;
 
 public:
-	TetrisGamestateLoader(SignalBroker& signalbroker):
+	PacmanGamestateLoader(SignalBroker& signalbroker):
 		signalbroker(signalbroker),
 		scenegraphcontroller(0),
 		gamestatecontroller(0),
@@ -146,54 +146,54 @@ public:
 			<SceneGraphController::GetSceneGraphControllerHandler>
 			(
 				"/scenegraphcontroller/get",
-				boost::bind(&TetrisGamestateLoader::GetSceneGraphController, this, _1));
+				boost::bind(&PacmanGamestateLoader::GetSceneGraphController, this, _1));
 		gatestatecontrollerconnection = signalbroker.ConnectToSignal
 			<GamestateController::GetGamestateControllerHandler>
 			(
 				"/gamestatecontroller/get",
-				boost::bind(&TetrisGamestateLoader::GetGamestateController, this, _1));
+				boost::bind(&PacmanGamestateLoader::GetGamestateController, this, _1));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
 				"/tetrisgamestatecontroller/newgame",
-				boost::bind(&TetrisGamestateLoader::NewGame, this));
+				boost::bind(&PacmanGamestateLoader::NewGame, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
 				"/tetrisgamestatecontroller/endgame",
-				boost::bind(&TetrisGamestateLoader::EndGame, this));
+				boost::bind(&PacmanGamestateLoader::EndGame, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
 				"/tetrisgamestatecontroller/enteredname",
-				boost::bind(&TetrisGamestateLoader::EnteredName, this));
+				boost::bind(&PacmanGamestateLoader::EnteredName, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
 				"/tetrisgamestatecontroller/enterhighscores",
-				boost::bind(&TetrisGamestateLoader::EnterHighScores, this));
+				boost::bind(&PacmanGamestateLoader::EnterHighScores, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
 				"/tetrisgamestatecontroller/credits",
-				boost::bind(&TetrisGamestateLoader::EnterCredits, this));
+				boost::bind(&PacmanGamestateLoader::EnterCredits, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
 				"/tetrisgamestatecontroller/configuration",
-				boost::bind(&TetrisGamestateLoader::EnterConfiguration, this));
+				boost::bind(&PacmanGamestateLoader::EnterConfiguration, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
 				"/tetrisgamestatecontroller/quit",
-				boost::bind(&TetrisGamestateLoader::Quit, this));
+				boost::bind(&PacmanGamestateLoader::Quit, this));
 
 		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Initiating gamestates.");
 
@@ -258,491 +258,8 @@ public:
 		}
 		{
 
-			SceneGraph& scenegraph = scenegraphcontroller->CreateSceneGraph("Tetris");
-			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created scenegraph: Tetris");
-
-			SceneNode& root = scenegraph.GetRoot();
-
-
-
-			boost::shared_ptr<TriangleStrip> block(new TriangleStrip(false));
-			//create block geometry
-			block->AddVertex(Vertex(0,0,1, 0,0));
-			block->AddVertex(Vertex(24,0,1, 1,0));
-			block->AddVertex(Vertex(0,24,1, 0,1));
-			block->AddVertex(Vertex(24,24,1, 1,1));
-
-			//create hidden pieces from which to copy later in the game
-			{
-				// X
-				// X
-				// X
-				// X
-				SceneNode& piece0 = root.CreateChildNode("piece0");
-
-				PositionProperty& positionproperty = piece0.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-				Matrix4& m = positionproperty.GetPosition();
-				//[row, column]
-				m(0,3) = 492.0f;
-				m(1,3) = 160.0f;
-
-				{
-					SceneNode& piece0a = piece0.CreateChildNode("piece0a");
-					piece0a.AddSceneNodeProperty("geometry", boost::shared_ptr<GeometryProperty>(new GeometryProperty(block)));
-					piece0a.AddSceneNodeProperty("texture", boost::shared_ptr<TextureProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/redblock.png"))));
-					PositionProperty& positionproperty = piece0a.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 0.0f;
-				}
-				{
-					SceneNode& piece0b = piece0.CreateChildNode("piece0b");
-					piece0b.AddSceneNodeProperty("geometry", boost::shared_ptr<GeometryProperty>(new GeometryProperty(block)));
-					piece0b.AddSceneNodeProperty("texture",  boost::shared_ptr<TextureProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/redblock.png"))));
-					PositionProperty& positionproperty = piece0b.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 24.0f;
-				}
-				{
-					SceneNode& piece0c = piece0.CreateChildNode("piece0c");
-					piece0c.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece0c.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/redblock.png"))));
-					PositionProperty& positionproperty = piece0c.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 48.0f;
-				}
-				{
-					SceneNode& piece0d = piece0.CreateChildNode("piece0d");
-					piece0d.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece0d.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/redblock.png"))));
-					PositionProperty& positionproperty = piece0d.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 72.0f;
-				}
-			}
-
-			{
-				// X X
-				// X X
-				SceneNode& piece1 = root.CreateChildNode("piece1");
-
-				PositionProperty& positionproperty = piece1.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-				Matrix4& m = positionproperty.GetPosition();
-				//[row, column]
-				m(0,3) = 492.0f;
-				m(1,3) = 160.0f;
-				{
-					SceneNode& piece1a = piece1.CreateChildNode("piece1a");
-					piece1a.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece1a.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/blueblock.png"))));
-					PositionProperty& positionproperty = piece1a.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 0.0f;
-				}
-				{
-					SceneNode& piece1b = piece1.CreateChildNode("piece1b");
-					piece1b.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece1b.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/blueblock.png"))));
-					PositionProperty& positionproperty = piece1b.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 24.0f;
-				}
-				{
-					SceneNode& piece1c = piece1.CreateChildNode("piece1c");
-					piece1c.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece1c.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/blueblock.png"))));
-					PositionProperty& positionproperty = piece1c.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 24.0f;
-					m(1,3) = 0.0f;
-				}
-				{
-					SceneNode& piece1d = piece1.CreateChildNode("piece1d");
-					piece1d.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece1d.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/blueblock.png"))));
-					PositionProperty& positionproperty = piece1d.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 24.0f;
-					m(1,3) = 24.0f;
-				}
-			}
-
-			{
-				// X
-				// X X
-				//   X
-				SceneNode& piece2 = root.CreateChildNode("piece2");
-
-				PositionProperty& positionproperty = piece2.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-				Matrix4& m = positionproperty.GetPosition();
-				//[row, column]
-				m(0,3) = 492.0f;
-				m(1,3) = 160.0f;
-
-				{
-					SceneNode& piece2a = piece2.CreateChildNode("piece2a");
-					piece2a.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece2a.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/greenblock.png"))));
-					PositionProperty& positionproperty = piece2a.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 0.0f;
-				}
-				{
-					SceneNode& piece2b = piece2.CreateChildNode("piece2b");
-					piece2b.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece2b.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/greenblock.png"))));
-					PositionProperty& positionproperty = piece2b.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 24.0f;
-				}
-				{
-					SceneNode& piece2c = piece2.CreateChildNode("piece1c");
-					piece2c.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece2c.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/greenblock.png"))));
-					PositionProperty& positionproperty = piece2c.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 24.0f;
-					m(1,3) = 24.0f;
-				}
-				{
-					SceneNode& piece2d = piece2.CreateChildNode("piece1d");
-					piece2d.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece2d.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/greenblock.png"))));
-					PositionProperty& positionproperty = piece2d.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 24.0f;
-					m(1,3) = 48.0f;
-				}
-			}
-
-			{
-				//   X
-				// X X
-				// X
-				SceneNode& piece3 = root.CreateChildNode("piece3");
-
-				PositionProperty& positionproperty = piece3.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-				Matrix4& m = positionproperty.GetPosition();
-				//[row, column]
-				m(0,3) = 492.0f;
-				m(1,3) = 160.0f;
-
-				{
-					SceneNode& piece3a = piece3.CreateChildNode("piece3a");
-					piece3a.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece3a.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/yellowblock.png"))));
-					PositionProperty& positionproperty = piece3a.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 24.0f;
-					m(1,3) = 0.0f;
-				}
-				{
-					SceneNode& piece3b = piece3.CreateChildNode("piece3b");
-					piece3b.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece3b.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/yellowblock.png"))));
-					PositionProperty& positionproperty = piece3b.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 24.0f;
-				}
-				{
-					SceneNode& piece3c = piece3.CreateChildNode("piece3c");
-					piece3c.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece3c.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/yellowblock.png"))));
-					PositionProperty& positionproperty = piece3c.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 24.0f;
-					m(1,3) = 24.0f;
-				}
-				{
-					SceneNode& piece3d = piece3.CreateChildNode("piece3d");
-					piece3d.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece3d.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/yellowblock.png"))));
-					PositionProperty& positionproperty = piece3d.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 48.0f;
-				}
-			}
-
-			{
-				// X
-				// X X
-				// X
-				SceneNode& piece4 = root.CreateChildNode("piece4");
-
-				PositionProperty& positionproperty = piece4.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-				Matrix4& m = positionproperty.GetPosition();
-				//[row, column]
-				m(0,3) = 492.0f;
-				m(1,3) = 160.0f;
-
-				piece4.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/orangeblock.png"))));
-				{
-					SceneNode& piece4a = piece4.CreateChildNode("piece4a");
-					piece4a.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece4a.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/orangeblock.png"))));
-					PositionProperty& positionproperty = piece4a.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 0.0f;
-				}
-				{
-					SceneNode& piece4b = piece4.CreateChildNode("piece4b");
-					piece4b.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece4b.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/orangeblock.png"))));
-					PositionProperty& positionproperty = piece4b.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 24.0f;
-				}
-				{
-					SceneNode& piece4c = piece4.CreateChildNode("piece4c");
-					piece4c.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece4c.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/orangeblock.png"))));
-					PositionProperty& positionproperty = piece4c.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 24.0f;
-					m(1,3) = 24.0f;
-				}
-				{
-					SceneNode& piece4d = piece4.CreateChildNode("piece4d");
-					piece4d.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece4d.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/orangeblock.png"))));
-					PositionProperty& positionproperty = piece4d.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 48.0f;
-				}
-			}
-
-			{
-				// X X
-				// X
-				// X
-				SceneNode& piece5 = root.CreateChildNode("piece5");
-
-				PositionProperty& positionproperty = piece5.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-				Matrix4& m = positionproperty.GetPosition();
-				//[row, column]
-				m(0,3) = 492.0f;
-				m(1,3) = 160.0f;
-
-				{
-					SceneNode& piece5a = piece5.CreateChildNode("piece5a");
-					piece5a.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece5a.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/lightblueblock.png"))));
-					PositionProperty& positionproperty = piece5a.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 0.0f;
-				}
-				{
-					SceneNode& piece5b = piece5.CreateChildNode("piece5b");
-					piece5b.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece5b.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/lightblueblock.png"))));
-					PositionProperty& positionproperty = piece5b.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 24.0f;
-					m(1,3) = 0.0f;
-				}
-				{
-					SceneNode& piece5c = piece5.CreateChildNode("piece5c");
-					piece5c.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece5c.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/lightblueblock.png"))));
-					PositionProperty& positionproperty = piece5c.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 24.0f;
-				}
-				{
-					SceneNode& piece5d = piece5.CreateChildNode("piece5d");
-					piece5d.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece5d.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/lightblueblock.png"))));
-					PositionProperty& positionproperty = piece5d.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 48.0f;
-				}
-			}
-
-			{
-				// X X
-				//   X
-				//   X
-				SceneNode& piece6 = root.CreateChildNode("piece6");
-
-				PositionProperty& positionproperty = piece6.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-				Matrix4& m = positionproperty.GetPosition();
-				//[row, column]
-				m(0,3) = 492.0f;
-				m(1,3) = 160.0f;
-				{
-					SceneNode& piece6a = piece6.CreateChildNode("piece6a");
-					piece6a.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece6a.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/purpleblock.png"))));
-					PositionProperty& positionproperty = piece6a.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 0.0f;
-					m(1,3) = 0.0f;
-				}
-				{
-					SceneNode& piece6b = piece6.CreateChildNode("piece6b");
-					piece6b.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece6b.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/purpleblock.png"))));
-					PositionProperty& positionproperty = piece6b.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 24.0f;
-					m(1,3) = 0.0f;
-				}
-				{
-					SceneNode& piece6c = piece6.CreateChildNode("piece6c");
-					piece6c.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece6c.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/purpleblock.png"))));
-					PositionProperty& positionproperty = piece6c.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 24.0f;
-					m(1,3) = 24.0f;
-				}
-				{
-					SceneNode& piece6d = piece6.CreateChildNode("piece6d");
-					piece6d.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(block)));
-					piece6d.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/purpleblock.png"))));
-					PositionProperty& positionproperty = piece6d.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					m(0,3) = 24.0f;
-					m(1,3) = 48.0f;
-				}
-			}
-
-
-			//create wall(s)
-			boost::shared_ptr<TriangleStrip> wall(new TriangleStrip(true));
-			wall->AddVertex(Vertex(0,0,0));
-			wall->AddVertex(Vertex(5,0,0));
-			wall->AddVertex(Vertex(0,480,0));
-			wall->AddVertex(Vertex(5,480,0));
-
-			{
-				SceneNode& rightwall = root.CreateChildNode("rightwall");
-
-
-				PositionProperty& positionproperty = rightwall.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-				Matrix4& m = positionproperty.GetPosition();
-				//[row, column]
-				m(0,3) = 195.0f;
-				m(1,3) = 0.0f;
-				rightwall.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(wall)));
-				/*TextureProperty& textureproperty = */rightwall.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/white.png"))));
-			}
-
-			{
-				SceneNode& leftwall = root.CreateChildNode("leftwall");
-
-
-				PositionProperty& positionproperty = leftwall.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-				Matrix4& m = positionproperty.GetPosition();
-				//[row, column]
-				m(0,3) = 440.0f;
-				m(1,3) = 0.0f;
-				leftwall.AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(wall)));
-				/*TextureProperty& textureproperty = */leftwall.AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/white.png"))));
-			}
-
-			{
-				SceneNode& nextpeice = root.CreateChildNode("nextpiece");
-				signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created scenenode: nextpeice.");
-
-
-				PositionProperty& positionproperty = nextpeice.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-				Matrix4& m = positionproperty.GetPosition();
-				//[row, column]
-				m(0,3) = 492.0f;
-				m(1,3) = 240.5f;
-
-				signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created positionproperty for nextpeice.");
-			}
-
-			{
-				SceneNode& currentpiece = root.CreateChildNode("currentpiece");
-				signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created scenenode: currentpiece.");
-
-
-				PositionProperty& positionproperty = currentpiece.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-				Matrix4& m = positionproperty.GetPosition();
-				//[row, column]
-				m(0,3) = 320.0f;
-				m(1,3) = 0.0f;
-
-				signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created positionproperty for currentpiece.");
-			}
-
-			{
-				SceneNode& placedpeices = root.CreateChildNode("placedpieces");
-				signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created scenenode: placedpeices.");
-
-
-				PositionProperty& positionproperty = placedpeices.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-				Matrix4& m = positionproperty.GetPosition();
-				//[row, column]
-				m(0,3) = 200.0f;
-				m(1,3) = 0.0f;
-
-				signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created positionproperty for placedpeices.");
-
-				//create all line nodes. These will hold a line of blocks for placed pieces
-				for(int i=0; i<20; i++)
-				{
-					std::string name("line"+boost::lexical_cast<std::string>(i));
-					SceneNode& line = placedpeices.CreateChildNode(name);
-					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created scenenode: "+name+".");
-
-
-					PositionProperty& positionproperty = line.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
-					Matrix4& m = positionproperty.GetPosition();
-					//[row, column]
-					//lines from the top down, line0 = top, line 19=bottom
-					m(0,3) = 0.0f;
-					m(1,3) = 24.0f*i;
-
-					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created positionproperty for "+name+".");
-				}
-			}
+			SceneGraph& scenegraph = //scenegraphcontroller->CreateSceneGraph("Tetris");
+			LoadSceneGraphFromFile(FileSystem::MakeUsrLocalPath("/levels/level1.xml"), "Tetris");
 		}
 		{
 			/*SceneGraph& scenegraph = */scenegraphcontroller->CreateSceneGraph("EnterName");
@@ -774,18 +291,20 @@ public:
 	}
 
 private:
-	SceneGraph& LoadSceneGraphFromFile(const std::string& path){
-		std::string name = "";
-		SceneGraph& scenegraph = scenegraphcontroller->CreateSceneGraph("Tetris");
-		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created scenegraph: Tetris");
+	SceneGraph& LoadSceneGraphFromFile(const std::string& path, const std::string& name=""){
+		SceneGraph& scenegraph = scenegraphcontroller->CreateSceneGraph(name);
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created scenegraph from file");
 
 		SceneNode& root = scenegraph.GetRoot();
 
 
 		TiXmlDocument document(path);
+		document.LoadFile();
 		const TiXmlElement* level = document.FirstChildElement("level");
 
 		if(level){
+
+			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Found <level>");
 
 			const std::string* id = level->Attribute("id");
 			SceneNode& levelnode = root.CreateChildNode(id?*id:"");
@@ -794,35 +313,85 @@ private:
 
 			std::map<std::string, SceneNode::SceneNodePtr> sprites;
 
-			(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/white.png"))));
 
 			//Load all sprites
 			const TiXmlElement* spritesheets = level->FirstChildElement("spritesheets");
 			if(spritesheets){
+				signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Found <spritesheets>");
 				
 				SceneNode& spritesheetsnode = root.CreateChildNode("spritesheets");
 				const TiXmlElement* spritesheet = spritesheets->FirstChildElement("spritesheet");
 				while(spritesheet){
-					const std::string* id = layer->Attribute("id");
-					const std::string* filepath = layer->Attribute("filepath");
+					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Found <spritesheet>");
+
+					const std::string* id = spritesheet->Attribute("id");
+					const std::string* filepath = spritesheet->Attribute("filepath");
+
+					int defaultwidth = 0;
+					int defaultheight = 0;
+					float filewidth = 1.0f;
+					float fileheight = 1.0f;
+
 					if(filepath){
+
+						signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "It's using filepath");
+						signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", *filepath);
+
 						SceneNode& spritesheetnode = spritesheetsnode.CreateChildNode(id?*id:"");
+						spritesheet->Attribute("defaultwidth", &defaultwidth);
+						spritesheet->Attribute("defaultheight", &defaultheight);
+						spritesheet->Attribute("filewidth", &filewidth);
+						spritesheet->Attribute("fileheight", &fileheight);
+
+						std::stringstream ss;
+						ss<<"creating spritesheet"<<std::endl
+						<<"defaultwidth:"<<defaultwidth<<std::endl
+						<<"defaultheight:"<<defaultheight<<std::endl;
+						signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", ss.str());
+
 
 						const TiXmlElement* sprite = spritesheet->FirstChildElement("sprite");
 						while(sprite){
-							const std::string* id = layer->Attribute("id");
+							const std::string* id = sprite->Attribute("id");
 							if(id){
 								SceneNode::SceneNodePtr spritenode = spritesheetnode.CreateChildNodePtr(*id);
 
-								//TODO: sprite texture coords
-								boost::shared_ptr<TriangleStrip> sprite(new TriangleStrip(false));
-								//create sprite geometry
-								sprite->AddVertex(Vertex(0,0,1, 0,0));
-								sprite->AddVertex(Vertex(24,0,1, 1,0));
-								sprite->AddVertex(Vertex(0,24,1, 0,1));
-								sprite->AddVertex(Vertex(24,24,1, 1,1));
+								int width = defaultwidth;
+								int height = defaultheight;
+								float u0 = 0.0f;
+								float u1 = 1.0f;
+								float v0 = 0.0f;
+								float v1 = 1.0f;
 
-								//TODO: width height
+								sprite->Attribute("width", &width);
+								sprite->Attribute("height", &height);
+								if(width==0){
+									width = defaultwidth;
+								}
+								if(height==0){
+									height = defaultheight;
+								}
+								sprite->Attribute("u0", &u0);
+								sprite->Attribute("u1", &u1);
+								sprite->Attribute("v0", &v0);
+								sprite->Attribute("v1", &v1);
+
+								boost::shared_ptr<TriangleStrip> sprite(new TriangleStrip(true));
+								//create sprite geometry
+								sprite->AddVertex(Vertex(0,0,1, u0/filewidth,v0/fileheight));
+								sprite->AddVertex(Vertex(width,0,1, u1/filewidth,v0/fileheight));
+								sprite->AddVertex(Vertex(0,height,1, u0/filewidth,v1/fileheight));
+								sprite->AddVertex(Vertex(width,height,1, u1/filewidth,v1/fileheight));
+
+								std::stringstream ss;
+								ss<<"creating sprite"<<*id<<std::endl
+								<<"width:"<<width<<std::endl
+								<<"height:"<<height<<std::endl
+								<<"(u0,v0):"<<"("<<u0/filewidth<<","<<v0/fileheight<<")"<<std::endl
+								<<"(u1,v1):"<<"("<<u1/filewidth<<","<<v1/fileheight<<")"<<std::endl;
+								signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", ss.str());
+
+
 								spritenode->AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(sprite)));
 								spritenode->AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath(*filepath))));
 
@@ -850,22 +419,55 @@ private:
 
 						if(element->Value()=="spritegrid"){
 							const std::string* id = element->Attribute("id");
+							float horizontalcellspacing = 16.0f;
+							float verticalcellspacing = 16.0f;
+
+							float x = 0.0f;
+							float y = 0.0f;
+
+							element->Attribute("horizontalcellspacing", &horizontalcellspacing);
+							element->Attribute("verticalcellspacing", &verticalcellspacing);
+
+
+							element->Attribute("x", &x);
+							element->Attribute("y", &y);
+
 							SceneNode& spritegridnode = layernode.CreateChildNode(id?*id:"");
+							PositionProperty& position = spritegridnode.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
+							Matrix4& m = position.GetPosition();
+							//position spritecell in the grid
+							//[row, column]
+							m(0,3) = x;
+							m(1,3) = y;
 
 							TiXmlElement* spritecell = element->FirstChildElement("spritecell");
 							while(spritecell){
 								const std::string* id = spritecell->Attribute("id");
 								const std::string* spriteid = spritecell->Attribute("spriteid");
+								float x = 0.0f;
+								float y = 0.0f;
+								spritecell->Attribute("x", &x);
+								spritecell->Attribute("y", &y);
+
 								if(spriteid){
-									SceneNode::SceneNodePtr spritenode = sprites[*spriteid];
+									SceneNode::SceneNodePtr spritenode = sprites[*spriteid]->Clone();
 									//SceneNode& spritecellnode = spritegridnode.CreateChildNode(id?*id:"");
 
-									//TODO: clone?
-									spritegridnode.AddChildNode(spritenode);
-									//TODO: position spritecell in the grid
+									PositionProperty& position = spritenode->AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
+									Matrix4& m = position.GetPosition();
+									//position spritecell in the grid
 									//[row, column]
-									//m(0,3) = 0.0f;
-									//m(1,3) = 0.0f;
+									m(0,3) = x * horizontalcellspacing;
+									m(1,3) = y * verticalcellspacing;
+
+									std::stringstream ss;
+									ss<<"placing sprite: "<<*spriteid<<std::endl
+									<<"x:"<<m(0,3)<<std::endl
+									<<"y:"<<m(1,3)<<std::endl;
+									signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", ss.str());
+
+
+									spritegridnode.AddChildNode(spritenode);
 								}
 								spritecell = spritecell->NextSiblingElement("spritecell");
 							}
@@ -898,6 +500,8 @@ private:
 					character = character->NextSiblingElement();
 				}
 			}
+			root.DeleteChildNodeByName("spritesheets");
 		}
+		return scenegraph;
 	}
 };

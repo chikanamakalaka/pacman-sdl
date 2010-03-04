@@ -103,9 +103,9 @@ int main(int argc, char *argv[]) try{
 
 	//application specific
 	TetrisInputView tetrisinputview(signalbroker);
-	TetrisLogic tetrislogic(signalbroker);
-	SDLTetrisAudio tetrisaudio(signalbroker);
-	TetrisGamestateLoader tetrisgamestateloader(signalbroker);
+	//TetrisLogic tetrislogic(signalbroker);
+	//SDLTetrisAudio tetrisaudio(signalbroker);
+	PacmanGamestateLoader pacmangamestateloader(signalbroker);
 	TetrisMainMenuController tetrismainmenucontroller(signalbroker);
 	TetrisConfigurationMenuController tetrisconfigurationmenucontroller(signalbroker);
 	TetrisGameGUIController tetrisgameguicontroller(signalbroker);
