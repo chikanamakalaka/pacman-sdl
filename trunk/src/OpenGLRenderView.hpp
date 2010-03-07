@@ -104,7 +104,7 @@ protected:
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Caught EventDoesNotExist");
 		}
 	}
-	void RenderAll(SceneGraph& scenegraph){
+	void RenderAll(boost::shared_ptr<SceneGraph> scenegraph){
 		if(initialized){
 			//signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Rendering scenegraph with OpenGL");
 			signalbroker.InvokeSignal<SceneGraphController::GetSelectedSceneGraphHandler>
@@ -117,23 +117,23 @@ protected:
 			("/openglrenderview/endrender", scenegraph);
 		}
 	}
-	void BeginRender(SceneGraph& scenegraph){
+	void BeginRender(boost::shared_ptr<SceneGraph> scenegraph){
 		glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
 		glClear( GL_COLOR_BUFFER_BIT );
 	}
-	void Render(SceneGraph& scenegraph){
+	void Render(boost::shared_ptr<SceneGraph> scenegraph){
 		//if opengl scene node processor is not registered, register it
-		if(!scenegraph.HasNodeProcessor("geometry")){
+		if(!scenegraph->HasNodeProcessor("geometry")){
 			std::list<std::string> geometrydependencies;
-			scenegraph.RegisterNodeProcessor("geometry", geometrydependencies, boost::bind(&OpenGLRenderView::OpenGLNodeProcessor, this, _1));
-			scenegraph.VisitNodes(boost::bind(&OpenGLRenderView::OpenGLNodeProcessor, this, _1));
+			scenegraph->RegisterNodeProcessor("geometry", geometrydependencies, boost::bind(&OpenGLRenderView::OpenGLNodeProcessor, this, _1));
+			scenegraph->VisitNodes(boost::bind(&OpenGLRenderView::OpenGLNodeProcessor, this, _1));
 		}
 
 		//render the scenegraph
 		//signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Rendering SceneGraph with OpenGL.");
-		RenderSceneNodeAndChildren(scenegraph.GetRoot());
+		RenderSceneNodeAndChildren(scenegraph->GetRoot());
 	}
-	void EndRender(SceneGraph& scenegraph){
+	void EndRender(boost::shared_ptr<SceneGraph> scenegraph){
 		SDL_GL_SwapBuffers();
 	}
 

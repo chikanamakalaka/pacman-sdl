@@ -34,20 +34,19 @@ public:
 class SceneGraphController{
 public:
 	typedef void(GetSceneGraphControllerHandler)(SceneGraphController&);
-	typedef void(GetSelectedSceneGraphHandler)(SceneGraph&);
-	typedef void(CreatedSceneGraphHandler)(const std::string&, SceneGraph&);
+	typedef void(GetSelectedSceneGraphHandler)(boost::shared_ptr<SceneGraph>);
+	typedef void(CreatedSceneGraphHandler)(const std::string&, boost::shared_ptr<SceneGraph>);
 	typedef void(SelectSceneGraphHandler)(const std::string&);
-	typedef std::map<std::string, SceneGraph*> SceneGraphs_Tp;
+	typedef std::map<std::string, boost::shared_ptr<SceneGraph> > SceneGraphs_Tp;
 private:
 
 	SignalBroker& signalbroker;
 	SceneGraphs_Tp scenegraphs;
-	SceneGraph* selectedscenegraph;
+	boost::weak_ptr<SceneGraph> selectedscenegraph;
 
 public:
 	SceneGraphController(SignalBroker& signalbroker):
-		signalbroker(signalbroker),
-		selectedscenegraph(0){
+		signalbroker(signalbroker){
 		//bind GetSelectedSceneGraph to /clock/tick
 		//any observer that wants the selected scenegraph can access it through
 		// /scenegraphcontroller/getselectedscenegraph
@@ -67,21 +66,20 @@ public:
 			boost::bind(&SceneGraphController::SelectSceneGraph, this, _1));
 
 	}
-	SceneGraph& CreateSceneGraph(const std::string& name){
-		SceneGraph* scenegraph = 0;
+	boost::shared_ptr<SceneGraph> CreateSceneGraph(const std::string& name){
 		if(scenegraphs.find(name)==scenegraphs.end()){
-			scenegraph = new SceneGraph();
-			scenegraphs.insert(SceneGraphs_Tp::value_type(name, scenegraph));
-			if(selectedscenegraph == 0){
+			boost::shared_ptr<SceneGraph> scenegraph(new SceneGraph());
+			scenegraphs.insert(SceneGraphs_Tp::value_type(name, boost::shared_ptr<SceneGraph>(scenegraph)));
+			if(selectedscenegraph.expired()){
 				selectedscenegraph = scenegraph;
 			}
 			//Let subscribers know that a new scenegraph has been created.
 			signalbroker.InvokeSignal
 			<CreatedSceneGraphHandler>
 			(	"/scenegraphcontroller/createdscenegraph",
-				name, *scenegraph);
+				name, scenegraph);
 
-			return *scenegraph;
+			return scenegraph;
 		}
 		else{
 			throw SceneGraphAlreadyExists(name.c_str());
@@ -89,7 +87,6 @@ public:
 	}
 	void DeleteSceneGraph(const std::string& name){
 		if(scenegraphs.find(name)!=scenegraphs.end()){
-			delete scenegraphs.find(name)->second;
 			scenegraphs.erase(name);
 		}
 		else{
@@ -105,12 +102,12 @@ public:
 	}
 	void GetSelectedSceneGraph(long t, long dt){
 		//signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Getting selected scenegraph.");
-		if(selectedscenegraph){
-			signalbroker.InvokeSignal<GetSelectedSceneGraphHandler>("/scenegraphcontroller/getselectedscenegraph", *selectedscenegraph);
+		if(boost::shared_ptr<SceneGraph> scenegraph = selectedscenegraph.lock()){
+			signalbroker.InvokeSignal<GetSelectedSceneGraphHandler>("/scenegraphcontroller/getselectedscenegraph", scenegraph);
 		}
 	}
-	SceneGraph& GetSelectedSceneGraph()const{
-		return *selectedscenegraph;
+	boost::shared_ptr<SceneGraph> GetSelectedSceneGraph()const{
+		return selectedscenegraph.lock();
 	}
 	void GetSceneGraphController(long t, long dt){
 		signalbroker.InvokeSignal<GetSceneGraphControllerHandler>("/scenegraphcontroller/get", *this);

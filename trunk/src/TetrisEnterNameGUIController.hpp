@@ -186,7 +186,7 @@ public:
 		}
 	}
 protected:
-	virtual void CreateEnterNameGUI(const std::string& name, SceneGraph& scenegraph){
+	virtual void CreateEnterNameGUI(const std::string& name, boost::shared_ptr<SceneGraph> scenegraph){
 		if(name == "EnterName"){
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loading Tetris EnterNameGUI");
 
@@ -230,7 +230,7 @@ protected:
 
 
 			boost::shared_ptr<IRenderable> guichangui(new GuiChanGui(gui));
-			scenegraph.GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
+			scenegraph->GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
 
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded Tetris EnterNameGUI");
 			

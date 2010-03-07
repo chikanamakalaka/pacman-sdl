@@ -119,44 +119,43 @@ public:
 			}
 		}
 	}
-	void GetSelectedSceneGraph(SceneGraph& scenegraph){
+	void GetSelectedSceneGraph(boost::shared_ptr<SceneGraph> scenegraph){
 		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "TetisLogic::GetSelectedSceneGraph");
 
 		try{
-			currentpiece = scenegraph.GetRoot().GetChildNodePtrByName("currentpiece");
-			nextpiece = scenegraph.GetRoot().GetChildNodePtrByName("nextpiece");
-			placedpieces = scenegraph.GetRoot().GetChildNodePtrByName("placedpieces");
+			currentpiece = scenegraph->GetRoot().GetChildNodePtrByName("currentpiece");
+			nextpiece = scenegraph->GetRoot().GetChildNodePtrByName("nextpiece");
+			placedpieces = scenegraph->GetRoot().GetChildNodePtrByName("placedpieces");
 
 			pieces.resize(7);
 
-			pieces[0] = piece0 = scenegraph.GetRoot().GetChildNodePtrByName("piece0");
-			pieces[1] = piece1 = scenegraph.GetRoot().GetChildNodePtrByName("piece1");
-			pieces[2] = piece2 = scenegraph.GetRoot().GetChildNodePtrByName("piece2");
-			pieces[3] = piece3 = scenegraph.GetRoot().GetChildNodePtrByName("piece3");
-			pieces[4] = piece4 = scenegraph.GetRoot().GetChildNodePtrByName("piece4");
-			pieces[5] = piece5 = scenegraph.GetRoot().GetChildNodePtrByName("piece5");
-			pieces[6] = piece6 = scenegraph.GetRoot().GetChildNodePtrByName("piece6");
+			pieces[0] = piece0 = scenegraph->GetRoot().GetChildNodePtrByName("piece0");
+			pieces[1] = piece1 = scenegraph->GetRoot().GetChildNodePtrByName("piece1");
+			pieces[2] = piece2 = scenegraph->GetRoot().GetChildNodePtrByName("piece2");
+			pieces[3] = piece3 = scenegraph->GetRoot().GetChildNodePtrByName("piece3");
+			pieces[4] = piece4 = scenegraph->GetRoot().GetChildNodePtrByName("piece4");
+			pieces[5] = piece5 = scenegraph->GetRoot().GetChildNodePtrByName("piece5");
+			pieces[6] = piece6 = scenegraph->GetRoot().GetChildNodePtrByName("piece6");
 
-			lines[0] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line0");
-			lines[1] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line1");
-			lines[2] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line2");
-			lines[3] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line3");
-			lines[4] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line4");
-			lines[5] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line5");
-			lines[6] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line6");
-			lines[7] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line7");
-			lines[8] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line8");
-			lines[9] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line9");
-			lines[10] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line10");
-			lines[11] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line11");
-			lines[12] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line12");
-			lines[13] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line13");
-			lines[14] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line14");
-			lines[15] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line15");
-			lines[16] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line16");
-			lines[17] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line17");
-			lines[18] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line18");
-			lines[19] = scenegraph.GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line19");
+			lines[0] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line1");
+			lines[2] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line2");
+			lines[3] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line3");
+			lines[4] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line4");
+			lines[5] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line5");
+			lines[6] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line6");
+			lines[7] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line7");
+			lines[8] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line8");
+			lines[9] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line9");
+			lines[10] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line10");
+			lines[11] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line11");
+			lines[12] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line12");
+			lines[13] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line13");
+			lines[14] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line14");
+			lines[15] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line15");
+			lines[16] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line16");
+			lines[17] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line17");
+			lines[18] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line18");
+			lines[19] = scenegraph->GetRoot().GetChildNodeByName("placedpieces").GetChildNodePtrByName("line19");
 
 			getselectedscenegraphconnection.disconnect();
 			initialized = true;

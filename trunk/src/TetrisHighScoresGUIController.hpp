@@ -178,7 +178,7 @@ public:
 		}
 	}
 protected:
-	virtual void CreateHighScoresGUI(const std::string& name, SceneGraph& scenegraph){
+	virtual void CreateHighScoresGUI(const std::string& name, boost::shared_ptr<SceneGraph> scenegraph){
 		if(name == "HighScores"){
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loading Tetris HighScoresGUI");
 
@@ -240,7 +240,7 @@ protected:
 
 
 			boost::shared_ptr<IRenderable> guichangui(new GuiChanGui(gui));
-			scenegraph.GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
+			scenegraph->GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
 
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded Tetris HighScoresGUI");
 			
