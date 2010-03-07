@@ -168,7 +168,7 @@ public:
 		}
 	}
 protected:
-	virtual void CreateCreditsGUI(const std::string& name, SceneGraph& scenegraph){
+	virtual void CreateCreditsGUI(const std::string& name, boost::shared_ptr<SceneGraph> scenegraph){
 		if(name == "Credits"){
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loading Tetris CreditsGUI");
 
@@ -208,7 +208,7 @@ protected:
 
 
 			boost::shared_ptr<IRenderable> guichangui(new GuiChanGui(gui));
-			scenegraph.GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
+			scenegraph->GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
 
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded Tetris HighScoresGUI");
 			

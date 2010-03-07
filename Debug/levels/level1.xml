@@ -33,8 +33,8 @@
 			<sprite id="ghostcagebottom" u0="32" v0="336" u1="48" v1="352" />
 			<sprite id="ghostcageleft" u0="16" v0="352" u1="32" v1="368" />
 			<sprite id="ghostcageright" u0="32" v0="356" u1="48" v1="368" />
-			<sprite id="ghostcageleft" u0="16" v0="384" u1="32" v1="400" />
-			<sprite id="ghostcageright" u0="32" v0="400" u1="48" v1="416" />
+			<sprite id="ghostcagedoorleft" u0="16" v0="384" u1="32" v1="400" />
+			<sprite id="ghostcagedoorright" u0="32" v0="400" u1="48" v1="416" />
 			<sprite id="upperleftbumpdown" u0="16" v0="416" u1="32" v1="432" />
 			<sprite id="upperlrightbumpdown" u0="32" v0="416" u1="48" v1="432" />
 			<sprite id="topleftbumpin" u0="16" v0="432" u1="32" v1="448" />
@@ -50,7 +50,8 @@
 		<layer id="background" zindex="0">
 			<spritegrid id="background-spritesheet" horizontalcellspacing="16" verticalcellspacing="16" x="64" y="0">
 				<!-- row 0 -->
-				<!--<spritecell id="" x="0" y="" spriteid="" collision="" />
+				<!--
+				<spritecell id="" x="0" y="" spriteid="" collision="" />
 				<spritecell id="" x="1" y="" spriteid="" collision="" />
 				<spritecell id="" x="2" y="" spriteid="" collision="" />
 				<spritecell id="" x="3" y="" spriteid="" collision="" />
@@ -231,6 +232,133 @@
 				<spritecell id="" x="24" y="7" spriteid="bottominner" collision="true" />
 				<spritecell id="" x="25" y="7" spriteid="bottomrightinnerrounded" collision="true" />
 				<spritecell id="" x="27" y="7" spriteid="rightouter" collision="true" />
+
+				<spritecell id="" x="0" y="8" spriteid="leftouter" collision="" />
+				<spritecell id="" x="7" y="8" spriteid="leftinner" collision="" />
+				<spritecell id="" x="8" y="8" spriteid="rightinner" collision="" />
+				<spritecell id="" x="13" y="8" spriteid="leftinner" collision="" />
+				<spritecell id="" x="14" y="8" spriteid="rightinner" collision="" />
+				<spritecell id="" x="19" y="8" spriteid="leftinner" collision="" />
+				<spritecell id="" x="20" y="8" spriteid="rightinner" collision="" />
+				<spritecell id="" x="27" y="8" spriteid="rightouter" collision="" />
+
+				<spritecell id="" x="0" y="9" spriteid="bottomleftouterrounded" collision="" />
+				<spritecell id="" x="1" y="9" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="2" y="9" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="3" y="9" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="4" y="9" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="5" y="9" spriteid="toprightouterrounded" collision="" />
+				<spritecell id="" x="7" y="9" spriteid="leftinner" collision="" />
+				<spritecell id="" x="8" y="9" spriteid="bottomleftinnerrounded" collision="" />
+				<spritecell id="" x="9" y="9" spriteid="topinner" collision="" />
+				<spritecell id="" x="10" y="9" spriteid="topinner" collision="" />
+				<spritecell id="" x="11" y="9" spriteid="toprightinnerrounded" collision="" />
+				<spritecell id="" x="13" y="9" spriteid="leftinner" collision="" />
+				<spritecell id="" x="14" y="9" spriteid="rightinner" collision="" />
+				<spritecell id="" x="16" y="9" spriteid="topleftinnerrounded" collision="" />
+				<spritecell id="" x="17" y="9" spriteid="topinner" collision="" />
+				<spritecell id="" x="18" y="9" spriteid="topinner" collision="" />
+				<spritecell id="" x="19" y="9" spriteid="bottomrightinnerrounded" collision="" />
+				<spritecell id="" x="20" y="9" spriteid="rightinner" collision="" />
+				<spritecell id="" x="22" y="9" spriteid="topleftouterrounded" collision="" />
+				<spritecell id="" x="23" y="9" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="24" y="9" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="25" y="9" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="26" y="9" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="27" y="9" spriteid="bottomrightouterrounded" collision="" />
+
+				<spritecell id="" x="5" y="10" spriteid="leftouter" collision="" />
+				<spritecell id="" x="7" y="10" spriteid="leftinner" collision="" />
+				<spritecell id="" x="8" y="10" spriteid="topleftinnerrounded" collision="" />
+				<spritecell id="" x="9" y="10" spriteid="topinner" collision="" />
+				<spritecell id="" x="10" y="10" spriteid="topinner" collision="" />
+				<spritecell id="" x="11" y="10" spriteid="bottomrightinnerrounded" collision="" />
+				<spritecell id="" x="13" y="10" spriteid="bottomleftinnerrounded" collision="" />
+				<spritecell id="" x="14" y="10" spriteid="bottomrightinnerrounded" collision="" />
+				<spritecell id="" x="16" y="10" spriteid="bottomleftinnerrounded" collision="" />
+				<spritecell id="" x="17" y="10" spriteid="bottominner" collision="" />
+				<spritecell id="" x="18" y="10" spriteid="bottominner" collision="" />
+				<spritecell id="" x="19" y="10" spriteid="toprightinnerrounded" collision="" />
+				<spritecell id="" x="20" y="10" spriteid="rightinner" collision="" />
+				<spritecell id="" x="22" y="10" spriteid="rightouter" collision="" />
+
+				<spritecell id="" x="5" y="11" spriteid="leftouter" collision="" />
+				<spritecell id="" x="7" y="11" spriteid="leftinner" collision="" />
+				<spritecell id="" x="8" y="11" spriteid="rightinner" collision="" />
+				<spritecell id="" x="19" y="11" spriteid="leftinner" collision="" />
+				<spritecell id="" x="20" y="11" spriteid="rightinner" collision="" />
+				<spritecell id="" x="22" y="11" spriteid="rightouter" collision="" />
+
+				<spritecell id="" x="5" y="12" spriteid="leftouter" collision="" />
+				<spritecell id="" x="7" y="12" spriteid="leftinner" collision="" />
+				<spritecell id="" x="8" y="12" spriteid="rightinner" collision="" />
+				<spritecell id="" x="10" y="12" spriteid="ghostcagetopleft" collision="" />
+				<spritecell id="" x="11" y="12" spriteid="ghostcagetop" collision="" />
+				<spritecell id="" x="12" y="12" spriteid="ghostcagetop" collision="" />
+				<spritecell id="" x="13" y="12" spriteid="ghostcagedoorleft" collision="" />
+				<spritecell id="" x="14" y="12" spriteid="ghostcagedoorright" collision="" />
+				<spritecell id="" x="15" y="12" spriteid="ghostcagetop" collision="" />
+				<spritecell id="" x="16" y="12" spriteid="ghostcagetop" collision="" />
+				<spritecell id="" x="17" y="12" spriteid="ghostcagetopright" collision="" />
+				<spritecell id="" x="19" y="12" spriteid="leftinner" collision="" />
+				<spritecell id="" x="20" y="12" spriteid="rightinner" collision="" />
+				<spritecell id="" x="22" y="12" spriteid="rightouter" collision="" />
+
+				<spritecell id="" x="0" y="13" spriteid="topleftendcap" collision="" />
+				<spritecell id="" x="1" y="13" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="2" y="13" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="3" y="13" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="4" y="13" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="5" y="13" spriteid="bottomrightouterrounded" collision="" />
+				<spritecell id="" x="7" y="13" spriteid="bottomleftinnerrounded" collision="" />
+				<spritecell id="" x="8" y="13" spriteid="bottomrightinnerrounded" collision="" />
+				<spritecell id="" x="10" y="13" spriteid="ghostcageleft" collision="" />
+				<spritecell id="" x="17" y="13" spriteid="ghostcageright" collision="" />
+				<spritecell id="" x="19" y="13" spriteid="bottomleftinnerrounded" collision="" />
+				<spritecell id="" x="20" y="13" spriteid="bottomrightinnerrounded" collision="" />
+				<spritecell id="" x="22" y="13" spriteid="bottomleftouterrounded" collision="" />
+				<spritecell id="" x="23" y="13" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="24" y="13" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="25" y="13" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="26" y="13" spriteid="bottomouter" collision="" />
+				<spritecell id="" x="27" y="13" spriteid="bottomrightendcap" collision="" />
+
+				<spritecell id="" x="10" y="14" spriteid="ghostcageleft" collision="" />
+				<spritecell id="" x="17" y="14" spriteid="ghostcageright" collision="" />
+
+				<spritecell id="" x="0" y="15" spriteid="topleftendcap" collision="" />
+				<spritecell id="" x="1" y="15" spriteid="topouter" collision="" />
+				<spritecell id="" x="2" y="15" spriteid="topouter" collision="" />
+				<spritecell id="" x="3" y="15" spriteid="topouter" collision="" />
+				<spritecell id="" x="4" y="15" spriteid="topouter" collision="" />
+				<spritecell id="" x="5" y="15" spriteid="toprightouterrounded" collision="" />
+				<spritecell id="" x="7" y="15" spriteid="topleftinnerrounded" collision="" />
+				<spritecell id="" x="8" y="15" spriteid="toprightinnerrounded" collision="" />
+				<spritecell id="" x="10" y="15" spriteid="ghostcageleft" collision="" />
+				<spritecell id="" x="17" y="15" spriteid="ghostcageright" collision="" />
+				<spritecell id="" x="19" y="15" spriteid="topleftinnerrounded" collision="" />
+				<spritecell id="" x="20" y="15" spriteid="toprightinnerrounded" collision="" />
+				<spritecell id="" x="22" y="15" spriteid="topleftouterrounded" collision="" />
+				<spritecell id="" x="23" y="15" spriteid="topouter" collision="" />
+				<spritecell id="" x="24" y="15" spriteid="topouter" collision="" />
+				<spritecell id="" x="25" y="15" spriteid="topouter" collision="" />
+				<spritecell id="" x="26" y="15" spriteid="topouter" collision="" />
+				<spritecell id="" x="27" y="15" spriteid="toprightendcap" collision="" />
+
+				<spritecell id="" x="5" y="16" spriteid="rightouter" collision="" />
+				<spritecell id="" x="7" y="16" spriteid="leftinner" collision="" />
+				<spritecell id="" x="8" y="16" spriteid="rightinner" collision="" />
+				<spritecell id="" x="10" y="16" spriteid="ghostcagebottomleft" collision="" />
+				<spritecell id="" x="11" y="16" spriteid="ghostcagebottom" collision="" />
+				<spritecell id="" x="12" y="16" spriteid="ghostcagebottom" collision="" />
+				<spritecell id="" x="13" y="16" spriteid="ghostcagebottom" collision="" />
+				<spritecell id="" x="14" y="16" spriteid="ghostcagebottom" collision="" />
+				<spritecell id="" x="15" y="16" spriteid="ghostcagebottom" collision="" />
+				<spritecell id="" x="16" y="16" spriteid="ghostcagebottom" collision="" />
+				<spritecell id="" x="17" y="16" spriteid="ghostcagebottomright" collision="" />
+				<spritecell id="" x="19" y="16" spriteid="leftinner" collision="" />
+				<spritecell id="" x="20" y="16" spriteid="rightinner" collision="" />
+				<spritecell id="" x="22" y="16" spriteid="leftouter" collision="" />
 				
 			</spritegrid>
 		</layer>

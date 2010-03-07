@@ -58,6 +58,7 @@ public:
 	SceneNodePtr Clone()const;
 
 	const std::string& GetName()const;
+	void SetName(const std::string& name);
 
 	//Property CRUD
 	SceneNodeProperty& AddSceneNodeProperty(const std::string& name, SceneNodePropertyPtr scenenodeproperty);

@@ -75,7 +75,7 @@ public:
 		}
 	}
 protected:
-	virtual void CreateTetrisGUI(const std::string& name, SceneGraph& scenegraph){
+	virtual void CreateTetrisGUI(const std::string& name, boost::shared_ptr<SceneGraph> scenegraph){
 		if(name == "Tetris"){
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loading TetrisGUI");
 
@@ -103,7 +103,7 @@ protected:
 			level = dynamic_cast<gcn::Label*>(xmlgui->getWidget("level"));
 
 			boost::shared_ptr<IRenderable> guichangui(new GuiChanGui(gui));
-			scenegraph.GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
+			scenegraph->GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
 
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded TetrisGUI");
 			

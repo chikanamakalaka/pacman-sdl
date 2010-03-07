@@ -129,6 +129,11 @@ void SceneNode::DeleteChildNodes(){
 const std::string& SceneNode::GetName()const{
 	return name;
 }
+
+void SceneNode::SetName(const std::string& name){
+	this->name = name;
+}
+
 const SceneNode& SceneNode::GetChildNodeByName(const std::string& name)const{
 	SceneNodes::const_iterator itr = children.begin();
 	for(;itr!=children.end(); itr++){

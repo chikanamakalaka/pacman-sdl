@@ -28,7 +28,7 @@ public:
 		return *this;
 	}
 	/*template<typename T>
-	ArgsList& operator,(const T& value){
+	ArgsList& operator,(T& value){
 		values.push_back(boost::any(value));
 		return *this;
 	}*/

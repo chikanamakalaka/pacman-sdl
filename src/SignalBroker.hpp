@@ -14,7 +14,8 @@
 #include <set>
 #include <boost/signals.hpp>
 #include <boost/function.hpp>
-
+#include <boost/type_traits.hpp>
+#include "ArgsList.hpp"
 class SignalSubsrciber;
 
 template<typename Sig_Tp>
@@ -87,7 +88,7 @@ class SignalBroker{
 public:
 	typedef void(BlockHandler)(const std::string&);
 	typedef void(UnblockHandler)(const std::string&);
-
+	typedef void(GenericHandler)(const ArgsList& args);
 private:
 	typedef std::map<const std::string, SignalBase*> Signals;
 	typedef std::set<std::string> BlockedNamespaces;
@@ -113,6 +114,10 @@ public:
 		else{
 			Signal<Sig_Tp>* signal = new Signal<Sig_Tp>();
 			signals.insert(Signals::value_type(name, static_cast<SignalBase*>(signal)));
+
+			Signal<GenericHandler>* genericsignal = new Signal<GenericHandler>();
+			SignalBase* genericsignalbase = static_cast<SignalBase*>(genericsignal);
+			signals.insert(Signals::value_type(name+"-generic", genericsignalbase));
 			return *signal;
 		}
 	}
@@ -145,6 +150,10 @@ private:
 			signal = new Signal<Sig_Tp>();
 			SignalBase* signalbase = static_cast<SignalBase*>(signal);
 			signals.insert(Signals::value_type(name, signalbase));
+
+			Signal<GenericHandler>* genericsignal = new Signal<GenericHandler>();
+			SignalBase* genericsignalbase = static_cast<SignalBase*>(genericsignal);
+			signals.insert(Signals::value_type(name+"-generic", genericsignalbase));
 			return *signal;
 		}
 		else{
@@ -187,6 +196,7 @@ public:
 			//std::cout<<"Signalbroker invokoing signal: "<<name<<std::endl;
 			//std::cout.flush();
 			GetSignal<Fn_Tp>(name)();
+			GetSignal<GenericHandler>(name+"-generic")(ArgsList());
 		}
 	}
 	template<typename Fn_Tp>
@@ -195,6 +205,8 @@ public:
 			//std::cout<<"Signalbroker invokoing signal: "<<name<<std::endl;
 			//std::cout.flush();
 			GetSignal<Fn_Tp>(name)(arg1);
+			GetSignal<GenericHandler>(name+"-generic")((ArgsList().operator,<typename boost::function<Fn_Tp>::arg1_type>(arg1)));
+
 		}
 	}
 	template<typename Fn_Tp>
@@ -203,6 +215,7 @@ public:
 			//std::cout<<"Signalbroker invokoing signal: "<<name<<std::endl;
 			//std::cout.flush();
 			GetSignal<Fn_Tp>(name)(arg1, arg2);
+			GetSignal<GenericHandler>(name+"-generic")((ArgsList(), arg1, arg2));
 		}
 	}
 	template<typename Fn_Tp>
@@ -211,18 +224,21 @@ public:
 			//std::cout<<"Signalbroker invokoing signal: "<<name<<std::endl;
 			//std::cout.flush();
 			GetSignal<Fn_Tp>(name)(arg1, arg2, arg3);
+			GetSignal<GenericHandler>(name+"-generic")((ArgsList(), arg1, arg2, arg3));
 		}
 	}
 	template<typename Fn_Tp>
 	void InvokeSignal(const std::string& name, typename boost::function<Fn_Tp>::arg1_type arg1, typename boost::function<Fn_Tp>::arg2_type arg2, typename boost::function<Fn_Tp>::arg3_type arg3, typename boost::function<Fn_Tp>::arg4_type arg4){
 		if(HasSignal(name)){
 			GetSignal<Fn_Tp>(name)(arg1, arg2, arg3, arg4);
+			GetSignal<GenericHandler>(name+"-generic")((ArgsList(), arg1, arg2, arg3, arg4));
 		}
 	}
 	template<typename Fn_Tp>
 	void InvokeSignal(const std::string& name, typename boost::function<Fn_Tp>::arg1_type arg1, typename boost::function<Fn_Tp>::arg2_type arg2, typename boost::function<Fn_Tp>::arg3_type arg3, typename boost::function<Fn_Tp>::arg4_type arg4, typename boost::function<Fn_Tp>::arg5_type arg5){
 		if(HasSignal(name)){
 			GetSignal<Fn_Tp>(name)(arg1, arg2, arg3, arg4, arg5);
+			GetSignal<GenericHandler>(name+"-generic")((ArgsList(), arg1, arg2, arg3, arg4, arg5));
 		}
 	}
 };

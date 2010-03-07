@@ -18,17 +18,17 @@ private:
 	class MenuItemMouseListener : public gcn::MouseListener
 	{
 	public:
-		typedef void(MenuItemPressed)(const std::string&, gcn::Label& label);
-		typedef void(MenuItemReleased)(const std::string&, gcn::Label& label);
-		typedef void(MenuItemClicked)(const std::string&, gcn::Label& label);
-		typedef void(MenuItemEntered)(const std::string&, gcn::Label& label);
-		typedef void(MenuItemExited)(const std::string&, gcn::Label& label);
+		typedef void(MenuItemPressed)(const std::string&, gcn::Label* label);
+		typedef void(MenuItemReleased)(const std::string&, gcn::Label* label);
+		typedef void(MenuItemClicked)(const std::string&, gcn::Label* label);
+		typedef void(MenuItemEntered)(const std::string&, gcn::Label* label);
+		typedef void(MenuItemExited)(const std::string&, gcn::Label* label);
 	private:
 		const std::string name;
-		gcn::Label& label;
+		gcn::Label* label;
 		SignalBroker& signalbroker;
 	public:
-		MenuItemMouseListener(const std::string& name, gcn::Label& label, SignalBroker& signalbroker):
+		MenuItemMouseListener(const std::string& name, gcn::Label* label, SignalBroker& signalbroker):
 			name(name),
 			label(label),
 			signalbroker(signalbroker){}
@@ -183,7 +183,7 @@ public:
 		}
 	}
 protected:
-	virtual void CreateMainMenu(const std::string& name, SceneGraph& scenegraph){
+	virtual void CreateMainMenu(const std::string& name, boost::shared_ptr<SceneGraph> scenegraph){
 		if(name == "MainMenu"){
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loading Tetris MainMenu");
 
@@ -219,11 +219,11 @@ protected:
 			configurationlabel = dynamic_cast<gcn::Label*>(xmlgui->getWidget("configurationlabel"));
 			quitlabel = dynamic_cast<gcn::Label*>(xmlgui->getWidget("quitlabel"));
 
-			newgamemouselistener = new MenuItemMouseListener("newgame", *newgamelabel, signalbroker);
-			highscoresmouselistener = new MenuItemMouseListener("enterhighscores", *highscoreslabel, signalbroker);
-			creditsmouselistener = new MenuItemMouseListener("credits", *creditslabel, signalbroker);
-			configurationmouselistener = new MenuItemMouseListener("configuration", *configurationlabel, signalbroker);
-			quitmouselistener = new MenuItemMouseListener("quit", *quitlabel, signalbroker);
+			newgamemouselistener = new MenuItemMouseListener("newgame", newgamelabel, signalbroker);
+			highscoresmouselistener = new MenuItemMouseListener("enterhighscores", highscoreslabel, signalbroker);
+			creditsmouselistener = new MenuItemMouseListener("credits", creditslabel, signalbroker);
+			configurationmouselistener = new MenuItemMouseListener("configuration", configurationlabel, signalbroker);
+			quitmouselistener = new MenuItemMouseListener("quit", quitlabel, signalbroker);
 
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Connecting Listeners");
 
@@ -235,7 +235,7 @@ protected:
 
 
 			boost::shared_ptr<IRenderable> guichangui(new GuiChanGui(gui));
-			scenegraph.GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
+			scenegraph->GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
 
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded Tetris Main Menu");
 			
@@ -253,23 +253,23 @@ protected:
 			gui->logic();
 		}
 	}
-	void MenuItemPressed(const std::string& name, gcn::Label& label){
+	void MenuItemPressed(const std::string& name, gcn::Label* label){
 
 
 	}
-	void MenuItemReleased(const std::string& name, gcn::Label& label){
+	void MenuItemReleased(const std::string& name, gcn::Label* label){
 
 	}
-	void MenuItemClicked(const std::string& name, gcn::Label& label){
+	void MenuItemClicked(const std::string& name, gcn::Label* label){
 		signalbroker.InvokeSignal
 			<GamestateController::StateChangeHandler>
 			("/tetrisgamestatecontroller/"+name);
 	}
-	void MenuItemEntered(const std::string& name, gcn::Label& label){
-		label.setFont(hoverfont);
+	void MenuItemEntered(const std::string& name, gcn::Label* label){
+		label->setFont(hoverfont);
 	}
-	void MenuItemExited(const std::string& name, gcn::Label& label){
-		label.setFont(font);
+	void MenuItemExited(const std::string& name, gcn::Label* label){
+		label->setFont(font);
 	}
 
 };

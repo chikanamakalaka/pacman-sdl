@@ -258,7 +258,7 @@ public:
 		}
 		{
 
-			SceneGraph& scenegraph = //scenegraphcontroller->CreateSceneGraph("Tetris");
+			//SceneGraph& scenegraph = //scenegraphcontroller->CreateSceneGraph("Tetris");
 			LoadSceneGraphFromFile(FileSystem::MakeUsrLocalPath("/levels/level1.xml"), "Tetris");
 		}
 		{
@@ -291,11 +291,11 @@ public:
 	}
 
 private:
-	SceneGraph& LoadSceneGraphFromFile(const std::string& path, const std::string& name=""){
-		SceneGraph& scenegraph = scenegraphcontroller->CreateSceneGraph(name);
+	boost::shared_ptr<SceneGraph> LoadSceneGraphFromFile(const std::string& path, const std::string& name=""){
+		boost::shared_ptr<SceneGraph> scenegraph = scenegraphcontroller->CreateSceneGraph(name);
 		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created scenegraph from file");
 
-		SceneNode& root = scenegraph.GetRoot();
+		SceneNode& root = scenegraph->GetRoot();
 
 
 		TiXmlDocument document(path);
@@ -451,6 +451,7 @@ private:
 
 								if(spriteid){
 									SceneNode::SceneNodePtr spritenode = sprites[*spriteid]->Clone();
+									spritenode->SetName(id?*id:"");
 									//SceneNode& spritecellnode = spritegridnode.CreateChildNode(id?*id:"");
 
 									PositionProperty& position = spritenode->AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));

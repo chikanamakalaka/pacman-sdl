@@ -138,7 +138,7 @@ private:
 
 	SignalBroker& signalbroker;
 	SceneGraphs_Tp scenegraphs;
-	SceneGraph* selectedscenegraph;
+	boost::weak_ptr<SceneGraph> selectedscenegraph;
 
 	float tf;
 	float dtf;
@@ -146,8 +146,7 @@ private:
 public:
 	AnimationController(SignalBroker& signalbroker):
 		SignalSubscriber(signalbroker, "", "AnimationController"),
-		signalbroker(signalbroker),
-		selectedscenegraph(0){
+		signalbroker(signalbroker){
 
 		SignalSubscriber::ConnectToSignal
 		<SceneGraphController::GetSelectedSceneGraphHandler>
@@ -161,17 +160,17 @@ public:
 
 
 	}
-	void GetSelectedSceneGraph(SceneGraph& selectedscenegraph){
+	void GetSelectedSceneGraph(boost::shared_ptr<SceneGraph> selectedscenegraph){
 		//get the currently selected scenegraph
-		this->selectedscenegraph = &selectedscenegraph;
+		this->selectedscenegraph = selectedscenegraph;
 	}
 
 	void AnimateSceneGraph(long t, long dt){
-		if(selectedscenegraph){
+		if(boost::shared_ptr<SceneGraph> scenegraph = selectedscenegraph.lock()){
 			tf = t/1000.0f;
 			dtf = dt/1000.0f;
 
-			selectedscenegraph->VisitNodes(boost::bind(&AnimationController::AnimateSceneNode, this, _1, tf, dtf));
+			scenegraph->VisitNodes(boost::bind(&AnimationController::AnimateSceneNode, this, _1, tf, dtf));
 		}
 	}
 

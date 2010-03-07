@@ -24,8 +24,8 @@ distribution.
 #ifndef TINYXML_INCLUDED
 #define TINYXML_INCLUDED
 
-#pragma warning( disable : 4530 )
-#pragma warning( disable : 4786 )
+//#pragma warning( disable : 4530 )
+//#pragma warning( disable : 4786 )
 
 #include <string>
 #include <stdio.h>
