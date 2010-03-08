@@ -46,7 +46,7 @@
 #include "OpenGLRenderView.hpp"
 #include "GuiChanRenderView.hpp"
 #include "TetrisEnterNameGUIController.hpp"
-#include "TetrisLogic.hpp"
+#include "PacmanLogic.hpp"
 #include "TetrisHighScoresGUIController.hpp"
 #include "PacmanGamestateLoader.hpp"
 #include "SDLTetrisAudio.hpp"

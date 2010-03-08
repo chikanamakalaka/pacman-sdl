@@ -1,5 +1,5 @@
 /*
- * TetrisLogic.hpp
+ * PacmansLogic.hpp
  *
  *  Created on: Jun 4, 2009
  *      Author: asantos
@@ -10,10 +10,10 @@
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/uniform_int.hpp>
 
-#ifndef TETRISLOGIC_HPP_
-#define TETRISLOGIC_HPP_
+#ifndef PACMANLOGIC_HPP_
+#define PACMANLOGIC_HPP_
 
-class TetrisLogic:public SignalSubscriber{
+class PacmanLogic:public SignalSubscriber{
 public:
 	typedef void(ScoreChangedHandler)(int);
 	typedef void(LevelChangedHandler)(int);
@@ -61,8 +61,8 @@ private:
 
 
 public:
-	TetrisLogic(SignalBroker& signalbroker):
-		SignalSubscriber(signalbroker, "Tetris", "TetrisLogic"),
+	PacmanLogic(SignalBroker& signalbroker):
+		SignalSubscriber(signalbroker, "Pacman", "PacmanLogic"),
 		signalbroker(signalbroker),
 		score(0),
 		level(0),
@@ -79,9 +79,9 @@ public:
 
 
 		SignalSubscriber::ConnectToSignal
-		<TetrisLogic::LoadInitialStateHandler>
+		<PacmanLogic::LoadInitialStateHandler>
 		(	"/logic/loadinitialstate",
-			boost::bind(&TetrisLogic::LoadInitialState, this));
+			boost::bind(&PacmanLogic::LoadInitialState, this));
 
 		SignalSubscriber::ConnectToSignal<TetrisInputView::PlayerMovementHandler>
 		(	"/input/player/movedown",
@@ -91,22 +91,22 @@ public:
 		SignalSubscriber::ConnectToSignal
 		<TetrisInputView::PlayerMovementHandler>
 		(	"/input/player/movenormal",
-			boost::bind(&TetrisLogic::MovePlayerNormal, this));
+			boost::bind(&PacmanLogic::MovePlayerNormal, this));
 
 		SignalSubscriber::ConnectToSignal
 		<TetrisInputView::PlayerMovementHandler>
 		(	"/input/player/moveleft",
-			boost::bind(&TetrisLogic::MovePlayerLeft, this));
+			boost::bind(&PacmanLogic::MovePlayerLeft, this));
 
 		SignalSubscriber::ConnectToSignal
 		<TetrisInputView::PlayerMovementHandler>
 		(	"/input/player/moveright",
-				boost::bind(&TetrisLogic::MovePlayerRight, this));
+				boost::bind(&PacmanLogic::MovePlayerRight, this));
 
 		SignalSubscriber::ConnectToSignal
 		<TetrisInputView::PlayerMovementHandler>
 		(	"/input/player/rotate",
-			boost::bind(&TetrisLogic::RotatePlayer, this));
+			boost::bind(&PacmanLogic::RotatePlayer, this));
 
 		nextpiecenumber = die();
 
@@ -120,7 +120,7 @@ public:
 		}
 	}
 	void GetSelectedSceneGraph(boost::shared_ptr<SceneGraph> scenegraph){
-		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "TetisLogic::GetSelectedSceneGraph");
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "PacmanLogic::GetSelectedSceneGraph");
 
 		try{
 			currentpiece = scenegraph->GetRoot().GetChildNodePtrByName("currentpiece");
@@ -164,7 +164,7 @@ public:
 			//Process logic at appropriate interval
 			signalbroker.InvokeSignal<TimerView::IntervalHandler>(
 					"/timer/setinterval",
-					"/tetrislogic/processlogic", boost::bind(&TetrisLogic::ProcessLogic, this, _1, _2), IntervalPerLevel(level));
+					"/tetrislogic/processlogic", boost::bind(&PacmanLogic::ProcessLogic, this, _1, _2), IntervalPerLevel(level));
 
 
 			SetUpNextPeice();
@@ -225,7 +225,7 @@ public:
 
 					if(CanMoveToLeft()){
 						signalbroker.InvokeSignal
-						<TetrisLogic::AbleToMoveHandler>("/tetrislogic/abletomove");
+						<PacmanLogic::AbleToMoveHandler>("/tetrislogic/abletomove");
 
 						{
 							std::stringstream ss;
@@ -258,12 +258,12 @@ public:
 
 					if(CanMoveToRight()){
 						signalbroker.InvokeSignal
-						<TetrisLogic::AbleToMoveHandler>("/tetrislogic/abletomove");
+						<PacmanLogic::AbleToMoveHandler>("/tetrislogic/abletomove");
 
 						mcurrentpieceposition(0,3)+=24;
 					}else{
 						signalbroker.InvokeSignal
-						<TetrisLogic::UnableToMoveHandler>("/tetrislogic/unabletomove");
+						<PacmanLogic::UnableToMoveHandler>("/tetrislogic/unabletomove");
 					}
 				}
 			}
@@ -274,7 +274,7 @@ public:
 			if(initialized){
 				if(CanRotate()){
 					signalbroker.InvokeSignal
-					<TetrisLogic::AbleToRotateHandler>("/tetrislogic/abletorotate");
+					<PacmanLogic::AbleToRotateHandler>("/tetrislogic/abletorotate");
 
 					bounded_matrix<float,4,4> center(identity_matrix<float>(4));
 
@@ -332,7 +332,7 @@ public:
 					}
 				}else{
 					signalbroker.InvokeSignal
-					<TetrisLogic::UnableToRotateHandler>("/tetrislogic/unabletorotate");
+					<PacmanLogic::UnableToRotateHandler>("/tetrislogic/unabletorotate");
 				}
 			}
 		}
@@ -342,7 +342,7 @@ protected:
 		//current piece hit bottom?
 		if(StopCurrentPiece()){
 			signalbroker.InvokeSignal
-			<TetrisLogic::CurrentPieceStoppedHandler>("/tetrislogic/currentpiecestopped");
+			<PacmanLogic::CurrentPieceStoppedHandler>("/tetrislogic/currentpiecestopped");
 
 			MoveCurrentPieceIntoLines();
 			RemoveCompleteRows();
@@ -350,12 +350,12 @@ protected:
 			if(StopCurrentPiece()){
 				//lose condition, next piece immediately stopped :(
 				signalbroker.InvokeSignal
-				<TetrisLogic::GameOverHandler>
+				<PacmanLogic::GameOverHandler>
 				("/tetrislogic/gameover");
 
 				//stop updating logic, we're exiting to highscores or enter name menu
 				signalbroker.InvokeSignal
-					<TimerView::PauseIntervalHandler>
+					<PacmanLogic::PauseIntervalHandler>
 					("/timer/pauseinterval", "/tetrislogic/processlogic");
 
 				//check for high score
