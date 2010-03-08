@@ -32,12 +32,12 @@ private:
 	class EvQuit:public boost::statechart::event<EvQuit>{};
 
 	class MenuState;
-	class TetrisStateMachine:public boost::statechart::state_machine<TetrisStateMachine, MenuState>{
+	class PacmanStateMachine:public boost::statechart::state_machine<PacmanStateMachine, MenuState>{
 	private:
 		SignalBroker& signalbroker;
 	public:
 
-		TetrisStateMachine(SignalBroker& signalbroker):signalbroker(signalbroker){}
+		PacmanStateMachine(SignalBroker& signalbroker):signalbroker(signalbroker){}
 		SignalBroker& GetSignalBroker(){
 			return signalbroker;
 		}
@@ -51,7 +51,7 @@ private:
 	class ConfigurationState;
 	class TerminatedState;
 
-	class MenuState:public boost::statechart::state<MenuState, TetrisStateMachine>,public Gamestate{
+	class MenuState:public boost::statechart::state<MenuState, PacmanStateMachine>,public Gamestate{
 	public:
 		typedef boost::mpl::list<
 		boost::statechart::transition< EvNewGame, PacmanState>,
@@ -61,7 +61,7 @@ private:
 		boost::statechart::transition< EvQuit, TerminatedState>
 		> reactions;
 		MenuState(my_context ctx):
-			boost::statechart::state<MenuState, TetrisStateMachine>(ctx),
+			boost::statechart::state<MenuState, PacmanStateMachine>(ctx),
 			Gamestate("MainMenu", outermost_context().GetSignalBroker()){
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Constructed MenuState");
 		}
@@ -69,30 +69,30 @@ private:
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Deconstructing MenuState");
 		}
 	};
-	class EnterNameState:public boost::statechart::state<EnterNameState, TetrisStateMachine>,public Gamestate{
+	class EnterNameState:public boost::statechart::state<EnterNameState, PacmanStateMachine>,public Gamestate{
 	public:
 		typedef boost::statechart::transition< EvEnteredName, HighScoresState > reactions;
 		EnterNameState(my_context ctx):
-			boost::statechart::state<EnterNameState, TetrisStateMachine>(ctx),
+			boost::statechart::state<EnterNameState, PacmanStateMachine>(ctx),
 			Gamestate("EnterName", outermost_context().GetSignalBroker()){
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Constructed EnterNameState");
 		}
 	};
-	class HighScoresState:public boost::statechart::state<HighScoresState, TetrisStateMachine>,public Gamestate{
+	class HighScoresState:public boost::statechart::state<HighScoresState, PacmanStateMachine>,public Gamestate{
 	public:
 		typedef boost::statechart::transition< EvQuit, MenuState > reactions;
 		HighScoresState(my_context ctx):
-			boost::statechart::state<HighScoresState, TetrisStateMachine>(ctx),
+			boost::statechart::state<HighScoresState, PacmanStateMachine>(ctx),
 			Gamestate("HighScores", outermost_context().GetSignalBroker()){
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Constructed HighScoreState");
 
 			//reload highscores when entering highscores state
-			signalbroker.InvokeSignal<TetrisHighScoresGUIController::ReloadHighScoresHandler>("/highscores/reload");
+			signalbroker.InvokeSignal<PacmanHighScoresGUIController::ReloadHighScoresHandler>("/highscores/reload");
 
 		}
 	};
 
-	class PacmanState:public boost::statechart::state<PacmanState, TetrisStateMachine>,public Gamestate{
+	class PacmanState:public boost::statechart::state<PacmanState, PacmanStateMachine>,public Gamestate{
 	public:
 		typedef boost::mpl::list<
 		boost::statechart::transition< EvEndGame, EnterNameState >,
@@ -104,11 +104,11 @@ private:
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Constructed PacmanState");
 
 			//reload game when re-entering the game state
-			signalbroker.InvokeSignal<TetrisLogic::LoadInitialStateHandler>("/logic/loadinitialstate");
+			signalbroker.InvokeSignal<PacmanLogic::LoadInitialStateHandler>("/logic/loadinitialstate");
 
 			}
 	};
-	class CreditsState:public boost::statechart::state<CreditsState, TetrisStateMachine>,public Gamestate{
+	class CreditsState:public boost::statechart::state<CreditsState, PacmanStateMachine>,public Gamestate{
 	public:
 		typedef boost::statechart::transition< EvQuit, MenuState > reactions;
 		CreditsState(my_context ctx):
@@ -117,7 +117,7 @@ private:
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Constructed CreditsState");
 		}
 	};
-	class ConfigurationState:public boost::statechart::state<ConfigurationState, TetrisStateMachine>,public Gamestate{
+	class ConfigurationState:public boost::statechart::state<ConfigurationState, PacmanStateMachine>,public Gamestate{
 	public:
 		typedef boost::statechart::transition< EvQuit, MenuState > reactions;
 		ConfigurationState(my_context ctx):
@@ -126,7 +126,7 @@ private:
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Constructed ConfigurationState");
 		}
 	};
-	class TerminatedState:public boost::statechart::state<TerminatedState, TetrisStateMachine>{
+	class TerminatedState:public boost::statechart::state<TerminatedState, PacmanStateMachine>{
 	public:
 		TerminatedState(my_context ctx):
 			my_base(ctx){
@@ -134,14 +134,14 @@ private:
 			std::exit(0);
 		}
 	};
-	TetrisStateMachine tetrisstatemachine;
+	PacmanStateMachine Pacmanstatemachine;
 
 public:
 	PacmanGamestateLoader(SignalBroker& signalbroker):
 		signalbroker(signalbroker),
 		scenegraphcontroller(0),
 		gamestatecontroller(0),
-		tetrisstatemachine(signalbroker){
+		Pacmanstatemachine(signalbroker){
 		scenegraphcontrollerconnection = signalbroker.ConnectToSignal
 			<SceneGraphController::GetSceneGraphControllerHandler>
 			(
@@ -156,43 +156,43 @@ public:
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
-				"/tetrisgamestatecontroller/newgame",
+				"/Pacmangamestatecontroller/newgame",
 				boost::bind(&PacmanGamestateLoader::NewGame, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
-				"/tetrisgamestatecontroller/endgame",
+				"/Pacmangamestatecontroller/endgame",
 				boost::bind(&PacmanGamestateLoader::EndGame, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
-				"/tetrisgamestatecontroller/enteredname",
+				"/Pacmangamestatecontroller/enteredname",
 				boost::bind(&PacmanGamestateLoader::EnteredName, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
-				"/tetrisgamestatecontroller/enterhighscores",
+				"/Pacmangamestatecontroller/enterhighscores",
 				boost::bind(&PacmanGamestateLoader::EnterHighScores, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
-				"/tetrisgamestatecontroller/credits",
+				"/Pacmangamestatecontroller/credits",
 				boost::bind(&PacmanGamestateLoader::EnterCredits, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
-				"/tetrisgamestatecontroller/configuration",
+				"/Pacmangamestatecontroller/configuration",
 				boost::bind(&PacmanGamestateLoader::EnterConfiguration, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
-				"/tetrisgamestatecontroller/quit",
+				"/Pacmangamestatecontroller/quit",
 				boost::bind(&PacmanGamestateLoader::Quit, this));
 
 		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Initiating gamestates.");
@@ -220,32 +220,32 @@ public:
 	}
 	void NewGame(){
 		EvNewGame evnewgame;
-		tetrisstatemachine.process_event(evnewgame);
+		Pacmanstatemachine.process_event(evnewgame);
 	}
 	void EndGame(){
 		EvEndGame evendgame;
-		tetrisstatemachine.process_event(evendgame);
+		Pacmanstatemachine.process_event(evendgame);
 	}
 	void EnteredName(){
 		EvEnteredName eventeredname;
-		tetrisstatemachine.process_event(eventeredname);
+		Pacmanstatemachine.process_event(eventeredname);
 	}
 	void EnterHighScores(){
 		EvEnterHighScores eventerhighscores;
-		tetrisstatemachine.process_event(eventerhighscores);
+		Pacmanstatemachine.process_event(eventerhighscores);
 	}
 	void EnterCredits(){
 		EvEnterCredits eventercredits;
-		tetrisstatemachine.process_event(eventercredits);
+		Pacmanstatemachine.process_event(eventercredits);
 	}
 	void EnterConfiguration(){
 		EvEnterConfiguration eventerconfiguration;
-		tetrisstatemachine.process_event(eventerconfiguration);
+		Pacmanstatemachine.process_event(eventerconfiguration);
 	}
 	void Quit(){
 		EvQuit evquit;
-		tetrisstatemachine.process_event(evquit);
-		if(tetrisstatemachine.terminated()){
+		Pacmanstatemachine.process_event(evquit);
+		if(Pacmanstatemachine.terminated()){
 			exit(0);
 		}
 
@@ -258,7 +258,7 @@ public:
 		}
 		{
 
-			//SceneGraph& scenegraph = //scenegraphcontroller->CreateSceneGraph("Tetris");
+			//SceneGraph& scenegraph = //scenegraphcontroller->CreateSceneGraph("Pacman");
 			LoadSceneGraphFromFile(FileSystem::MakeUsrLocalPath("/levels/level1.xml"), "Pacman");
 		}
 		{
@@ -277,7 +277,7 @@ public:
 			/*SceneGraph& scenegraph = */scenegraphcontroller->CreateSceneGraph("Configuration");
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created scenegraph: Configuration");
 		}
-		//block all namespaces events before starting, tetrisstatemachine.initiate() will open up the entry state event namespace
+		//block all namespaces events before starting, Pacmanstatemachine.initiate() will open up the entry state event namespace
 		signalbroker.Block("MainMenu");
 		signalbroker.Block("Pacman");
 		signalbroker.Block("EnterName");
@@ -286,7 +286,7 @@ public:
 		signalbroker.Block("Configuration");
 
 
-		tetrisstatemachine.initiate();
+		Pacmanstatemachine.initiate();
 		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Finished initializing gamestates");
 	}
 
