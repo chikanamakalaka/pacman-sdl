@@ -1,16 +1,16 @@
 /*
- * TetrisMainMenuController.hpp
+ * PacmanMainMenuController.hpp
  *
  *  Created on: Aug 26, 2009
  *      Author: asantos
  */
 
-#ifndef TETRISMAINMENUCONTROLLER_HPP_
-#define TETRISMAINMENUCONTROLLER_HPP_
+#ifndef PACMANMAINMENUCONTROLLER_HPP_
+#define PACMANMAINMENUCONTROLLER_HPP_
 
 #include "XMLGuiChanMenuController.hpp"
 
-class TetrisMainMenuController:public XMLGuiChanMenuController{
+class PacmanMainMenuController:public XMLGuiChanMenuController{
 private:
 	SignalBroker& signalbroker;
 	const std::string menuname;
@@ -35,15 +35,15 @@ private:
 
 
 public:
-	TetrisMainMenuController(SignalBroker& signalbroker):
+	PacmanMainMenuController(SignalBroker& signalbroker):
 		XMLGuiChanMenuController(signalbroker, "MainMenu", "MainMenu"),
 		signalbroker(signalbroker),
 		menuname("MainMenu")
 		{
 		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output",
-			"TetrisMainMenuController::TetrisMainMenuController():this->signalnamespace==" + this->signalnamespace);
+			"PacmanMainMenuController::PacmanMainMenuController():this->signalnamespace==" + this->signalnamespace);
 	}
-	virtual ~TetrisMainMenuController(){
+	virtual ~PacmanMainMenuController(){
 
 		if(IsMenuInitialized()){
 			delete font;
@@ -110,7 +110,7 @@ protected:
 		boost::shared_ptr<IRenderable> guichangui(new GuiChanGui(gui));
 		scenegraph->GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
 
-		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded Tetris Main Menu");
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded Pacman Main Menu");
 
 		MenuInitialized();
 
@@ -125,7 +125,7 @@ protected:
 	void MenuItemClicked(const std::string& name, gcn::Label* label){
 		signalbroker.InvokeSignal
 			<GamestateController::StateChangeHandler>
-			("/tetrisgamestatecontroller/"+name);
+			("/pacmangamestatecontroller/"+name);
 	}
 	void MenuItemEntered(const std::string& name, gcn::Label* label){
 		std::cout<<"MainMenu MenuItemEntered"<<std::endl;
@@ -143,4 +143,4 @@ protected:
 
 };
 
-#endif /* TETRISMAINMENUCONTROLLER_HPP_ */
+#endif /* PACMANMAINMENUCONTROLLER_HPP_ */

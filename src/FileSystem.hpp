@@ -20,8 +20,8 @@ public:
 		return vargames+relativepath;
 	}
 };
-#define TETRIS_DEBUG
-#ifdef TETRIS_DEBUG
+#define PACMAN_DEBUG
+#ifdef PACMAN_DEBUG
 	std::string FileSystem::usrlocal = std::string(".");
 	std::string FileSystem::vargames = std::string(".");
 #else

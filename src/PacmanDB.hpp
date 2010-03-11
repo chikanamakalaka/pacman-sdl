@@ -1,29 +1,29 @@
 /*
- * TetrisDB.hpp
+ * PacmanDB.hpp
  *
  *  Created on: Oct 20, 2009
  *      Author: asantos
  */
 
-#ifndef TETRISDB_HPP_
-#define TETRISDB_HPP_
+#ifndef PACMANDB_HPP_
+#define PACMANDB_HPP_
 
 #include "sqlite3/sqlite3.h"
 #include <boost/bimap.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 
-class TetrisDBException : public virtual std::exception{
+class PacmanDBException : public virtual std::exception{
 private:
 		const char* msg;
 public:
-	TetrisDBException(const char* msg):msg(msg){}
+	PacmanDBException(const char* msg):msg(msg){}
 	char const* what()const throw(){
 		return msg;
 	}
 };
 
-class TetrisDB{
+class PacmanDB{
 private:
 	sqlite3 *db;
 	int rc;
@@ -42,11 +42,11 @@ public:
 		}
 	};
 
-	TetrisDB(const std::string& dbname = FileSystem::MakeVarGamesPath("/pileofblocks.db")):rc(sqlite3_open(dbname.c_str(), &db)){
+	PacmanDB(const std::string& dbname = FileSystem::MakeVarGamesPath("/pacman.db")):rc(sqlite3_open(dbname.c_str(), &db)){
 		if(rc){
 			const char* zErrMsg = sqlite3_errmsg(db);
 			sqlite3_close(db);
-			throw TetrisDBException(zErrMsg);
+			throw PacmanDBException(zErrMsg);
 		}
 	}
 
@@ -112,11 +112,11 @@ public:
 		sqlite3 *db;
 		sqlite3_stmt *res;
 		int rc;
-		rc = sqlite3_open("tetris.db", &db);
+		rc = sqlite3_open("pacman.db", &db);
 		if(rc){
 			const char* zErrMsg = sqlite3_errmsg(db);
 			sqlite3_close(db);
-			throw TetrisDBException(zErrMsg);
+			throw PacmanDBException(zErrMsg);
 		}
 		std::string sql = (boost::format("INSERT INTO Scores VALUES(NULL, %1%, '%2%');")%score%name).str();
 
@@ -146,7 +146,7 @@ public:
 			return;
 		}
 		if(rc!=SQLITE_OK){
-			throw TetrisDBException("Error in TetrisDB.");
+			throw PacmanDBException("Error in PacmanDB.");
 		}
 		sqlite3_close(db);
 	}
@@ -326,11 +326,11 @@ public:
 		sqlite3 *db;
 		sqlite3_stmt *res;
 		int rc;
-		rc = sqlite3_open("tetris.db", &db);
+		rc = sqlite3_open("pacman.db", &db);
 		if(rc){
 			const char* zErrMsg = sqlite3_errmsg(db);
 			sqlite3_close(db);
-			throw TetrisDBException(zErrMsg);
+			throw PacmanDBException(zErrMsg);
 		}
 		std::string sql = (boost::format("UPDATE Volumes SET Volume = %1% WHERE Name = '%2%'")%volume%name).str();
 
@@ -360,7 +360,7 @@ public:
 			return;
 		}
 		if(rc!=SQLITE_OK){
-			throw TetrisDBException("Error in TetrisDB.");
+			throw PacmanDBException("Error in PacmanDB.");
 		}
 		sqlite3_close(db);
 	}
@@ -369,11 +369,11 @@ public:
 		sqlite3 *db;
 		sqlite3_stmt *res;
 		int rc;
-		rc = sqlite3_open("tetris.db", &db);
+		rc = sqlite3_open("pacman.db", &db);
 		if(rc){
 			const char* zErrMsg = sqlite3_errmsg(db);
 			sqlite3_close(db);
-			throw TetrisDBException(zErrMsg);
+			throw PacmanDBException(zErrMsg);
 		}
 		std::string sql = (boost::format("UPDATE KeyBindings SET Key = %1% WHERE Name = '%2%'")%keyvalue%name).str();
 
@@ -403,11 +403,182 @@ public:
 			return;
 		}
 		if(rc!=SQLITE_OK){
-			throw TetrisDBException("Error in TetrisDB.");
+			throw PacmanDBException("Error in PacmanDB.");
 		}
 		sqlite3_close(db);
 	}
 
+	std::multimap<std::string, std::string> GetKeyUpBindings(){
+		std::multimap<std::string, std::string> keyupbindings;
+
+		char* zErrMsg = 0;
+		char** result ;
+		int rc = 0;
+		int nrow,ncol;
+		std::vector<std::string> vcol_head;
+		std::vector<std::string> vdata;
+
+
+		const std::string sql("SELECT Name, Event FROM KeyUpBindings");
+
+		rc = sqlite3_get_table(
+			db,              /* An open database */
+			sql.c_str(),       /* SQL to be executed */
+			&result,       /* Result written to a char *[]  that this points to */
+			&nrow,             /* Number of result rows written here */
+			&ncol,          /* Number of result columns written here */
+			&zErrMsg          /* Error msg written here */
+			);
+
+
+		if( rc == SQLITE_OK ){
+			for(int i=0; i < ncol; ++i){
+				vcol_head.push_back(result[i]);   /* First row heading */
+			}
+			for(int i=0; i < ncol*nrow; ++i){
+				vdata.push_back(result[ncol+i]);
+			}
+		}
+		sqlite3_free_table(result);
+
+
+		int nameidx, eventidx;
+
+		int idx=0;
+		for(std::vector<std::string>::const_iterator itr = vcol_head.begin(); itr!=vcol_head.end();itr++){
+			if(*itr=="Name"){
+				nameidx = idx;
+			}
+			else if(*itr=="Event"){
+				eventidx = idx;
+			}
+			idx++;
+		}
+
+		for(std::vector<std::string>::const_iterator itr = vdata.begin(); itr!=vdata.end(); itr+=vcol_head.size()){
+			std::string name = *(itr+nameidx);
+			std::string event = *(itr+eventidx);
+
+			keyupbindings.insert(std::multimap<std::string,std::string>::value_type(name, event));
+		}
+
+		return keyupbindings;
+	}
+
+	std::multimap<std::string, std::string> GetKeyDownBindings(){
+		std::multimap<std::string, std::string> keydownbindings;
+
+		char* zErrMsg = 0;
+		char** result ;
+		int rc = 0;
+		int nrow,ncol;
+		std::vector<std::string> vcol_head;
+		std::vector<std::string> vdata;
+
+
+		const std::string sql("SELECT Name, Event FROM KeyDownBindings");
+
+		rc = sqlite3_get_table(
+			db,              /* An open database */
+			sql.c_str(),       /* SQL to be executed */
+			&result,       /* Result written to a char *[]  that this points to */
+			&nrow,             /* Number of result rows written here */
+			&ncol,          /* Number of result columns written here */
+			&zErrMsg          /* Error msg written here */
+			);
+
+
+		if( rc == SQLITE_OK ){
+			for(int i=0; i < ncol; ++i){
+				vcol_head.push_back(result[i]);   /* First row heading */
+			}
+			for(int i=0; i < ncol*nrow; ++i){
+				vdata.push_back(result[ncol+i]);
+			}
+		}
+		sqlite3_free_table(result);
+
+
+		int nameidx, eventidx;
+
+		int idx=0;
+		for(std::vector<std::string>::const_iterator itr = vcol_head.begin(); itr!=vcol_head.end();itr++){
+			if(*itr=="Name"){
+				nameidx = idx;
+			}
+			else if(*itr=="Event"){
+				eventidx = idx;
+			}
+			idx++;
+		}
+
+		for(std::vector<std::string>::const_iterator itr = vdata.begin(); itr!=vdata.end(); itr+=vcol_head.size()){
+			std::string name = *(itr+nameidx);
+			std::string event = *(itr+eventidx);
+
+			keydownbindings.insert(std::multimap<std::string,std::string>::value_type(name, event));
+		}
+
+		return keydownbindings;
+	}
+
+	std::multimap<std::string, std::string> GetKeyHeldBindings(){
+		std::multimap<std::string, std::string> keyheldbindings;
+
+		char* zErrMsg = 0;
+		char** result ;
+		int rc = 0;
+		int nrow,ncol;
+		std::vector<std::string> vcol_head;
+		std::vector<std::string> vdata;
+
+
+		const std::string sql("SELECT Name, Event FROM KeyHeldBindings");
+
+		rc = sqlite3_get_table(
+			db,              /* An open database */
+			sql.c_str(),       /* SQL to be executed */
+			&result,       /* Result written to a char *[]  that this points to */
+			&nrow,             /* Number of result rows written here */
+			&ncol,          /* Number of result columns written here */
+			&zErrMsg          /* Error msg written here */
+			);
+
+
+		if( rc == SQLITE_OK ){
+			for(int i=0; i < ncol; ++i){
+				vcol_head.push_back(result[i]);   /* First row heading */
+			}
+			for(int i=0; i < ncol*nrow; ++i){
+				vdata.push_back(result[ncol+i]);
+			}
+		}
+		sqlite3_free_table(result);
+
+
+		int nameidx, eventidx;
+
+		int idx=0;
+		for(std::vector<std::string>::const_iterator itr = vcol_head.begin(); itr!=vcol_head.end();itr++){
+			if(*itr=="Name"){
+				nameidx = idx;
+			}
+			else if(*itr=="Event"){
+				eventidx = idx;
+			}
+			idx++;
+		}
+
+		for(std::vector<std::string>::const_iterator itr = vdata.begin(); itr!=vdata.end(); itr+=vcol_head.size()){
+			std::string name = *(itr+nameidx);
+			std::string event = *(itr+eventidx);
+
+			keyheldbindings.insert(std::multimap<std::string,std::string>::value_type(name, event));
+		}
+
+		return keyheldbindings;
+	}
+
 };
 
-#endif /* TETRISDB_HPP_ */
+#endif /* PACMANDB_HPP_ */

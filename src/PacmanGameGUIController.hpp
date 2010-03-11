@@ -1,16 +1,16 @@
 /*
- * TetrisGameGUIController.hpp
+ * PacmanGameGUIController.hpp
  *
  *  Created on: Aug 26, 2009
  *      Author: asantos
  */
 
-#ifndef TETRISGAMEGUICONTROLLER_HPP_
-#define TETRISGAMEGUICONTROLLER_HPP_
+#ifndef PACMANGAMEGUICONTROLLER_HPP_
+#define PACMANGAMEGUICONTROLLER_HPP_
 
 #include "XMLGuiChanMenuController.hpp"
 
-class TetrisGameGUIController:public XMLGuiChanMenuController{
+class PacmanGameGUIController:public XMLGuiChanMenuController{
 private:
 	SignalBroker& signalbroker;
 	const std::string menuname;
@@ -22,25 +22,25 @@ private:
 
 
 public:
-	TetrisGameGUIController(SignalBroker& signalbroker):
+	PacmanGameGUIController(SignalBroker& signalbroker):
 		XMLGuiChanMenuController(signalbroker, "PacmanMenu", "PacmanMenu"),
 		signalbroker(signalbroker),
 		menuname("PacmanMenu")
 		{
 
 		SignalSubscriber::ConnectToSignal
-		<TetrisLogic::ScoreChangedHandler>
-		( 	"/tetris/scorechanged",
-			boost::bind(&TetrisGameGUIController::ScoreChanged, this, _1));
+		<PacmanLogic::ScoreChangedHandler>
+		( 	"/pacman/scorechanged",
+			boost::bind(&PacmanGameGUIController::ScoreChanged, this, _1));
 
 
 		SignalSubscriber::ConnectToSignal
-		<TetrisLogic::LevelChangedHandler>
-		( 	"/tetris/levelchanged",
-			boost::bind(&TetrisGameGUIController::LevelChanged, this, _1));
+		<PacmanLogic::LevelChangedHandler>
+		( 	"/pacman/levelchanged",
+			boost::bind(&PacmanGameGUIController::LevelChanged, this, _1));
 
 	}
-	virtual ~TetrisGameGUIController(){
+	virtual ~PacmanGameGUIController(){
 		if(IsMenuInitialized()){
 			delete font;
 
@@ -51,7 +51,7 @@ public:
 	}
 protected:
 	virtual void CreateMenu(const std::string& name, boost::shared_ptr<SceneGraph> scenegraph){
-		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loading TetrisGUI");
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loading PacmanGUI");
 
 		SDL_EnableUNICODE(1);
 		SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
@@ -64,9 +64,9 @@ protected:
 		font = new gcn::ImageFont(FileSystem::MakeUsrLocalPath("/images/fixedfont.png"), " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 		gcn::Widget::setGlobalFont(font);
 
-		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Parsing TetrisGUI XML");
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Parsing PacmanGUI XML");
 
-		xmlgui->parse(FileSystem::MakeUsrLocalPath("/menus/tetrisgui.xml"));
+		xmlgui->parse(FileSystem::MakeUsrLocalPath("/menus/pacmangui.xml"));
 		gui->setGraphics(graphics);
 		gui->setInput(input);
 		gui->setTop(xmlgui->getWidget("top"));
@@ -79,7 +79,7 @@ protected:
 		boost::shared_ptr<IRenderable> guichangui(new GuiChanGui(gui));
 		scenegraph->GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
 
-		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded TetrisGUI");
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded PacmanGUI");
 
 		MenuInitialized();
 	}
@@ -111,4 +111,4 @@ protected:
 
 };
 
-#endif /* TETRISGAMEGUICONTROLLER_HPP_ */
+#endif /* PACMANGAMEGUICONTROLLER_HPP_ */

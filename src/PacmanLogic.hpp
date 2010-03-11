@@ -30,7 +30,7 @@ public:
 private:
 	SignalBroker& signalbroker;
 	boost::signals::connection getselectedscenegraphconnection;
-	boost::signals::connection gettetrissharedstateconnection;
+	boost::signals::connection getpacmansharedstateconnection;
 
 	int score;
 	int level;
@@ -75,7 +75,7 @@ public:
 		getselectedscenegraphconnection = SignalSubscriber::ConnectToSignal
 		<SceneGraphController::GetSelectedSceneGraphHandler>
 		(	"/scenegraphcontroller/getselectedscenegraph",
-			boost::bind(&TetrisLogic::GetSelectedSceneGraph, this, _1));
+			boost::bind(&PacmanLogic::GetSelectedSceneGraph, this, _1));
 
 
 		SignalSubscriber::ConnectToSignal
@@ -83,28 +83,28 @@ public:
 		(	"/logic/loadinitialstate",
 			boost::bind(&PacmanLogic::LoadInitialState, this));
 
-		SignalSubscriber::ConnectToSignal<TetrisInputView::PlayerMovementHandler>
+		SignalSubscriber::ConnectToSignal<InputView::PlayerMovementHandler>
 		(	"/input/player/movedown",
-			boost::bind(&TetrisLogic::MovePlayerDown, this));
+			boost::bind(&PacmanLogic::MovePlayerDown, this));
 
 
 		SignalSubscriber::ConnectToSignal
-		<TetrisInputView::PlayerMovementHandler>
+		<InputView::PlayerMovementHandler>
 		(	"/input/player/movenormal",
 			boost::bind(&PacmanLogic::MovePlayerNormal, this));
 
 		SignalSubscriber::ConnectToSignal
-		<TetrisInputView::PlayerMovementHandler>
+		<InputView::PlayerMovementHandler>
 		(	"/input/player/moveleft",
 			boost::bind(&PacmanLogic::MovePlayerLeft, this));
 
 		SignalSubscriber::ConnectToSignal
-		<TetrisInputView::PlayerMovementHandler>
+		<InputView::PlayerMovementHandler>
 		(	"/input/player/moveright",
 				boost::bind(&PacmanLogic::MovePlayerRight, this));
 
 		SignalSubscriber::ConnectToSignal
-		<TetrisInputView::PlayerMovementHandler>
+		<InputView::PlayerMovementHandler>
 		(	"/input/player/rotate",
 			boost::bind(&PacmanLogic::RotatePlayer, this));
 
@@ -164,7 +164,7 @@ public:
 			//Process logic at appropriate interval
 			signalbroker.InvokeSignal<TimerView::IntervalHandler>(
 					"/timer/setinterval",
-					"/tetrislogic/processlogic", boost::bind(&PacmanLogic::ProcessLogic, this, _1, _2), IntervalPerLevel(level));
+					"/pacmanlogic/processlogic", boost::bind(&PacmanLogic::ProcessLogic, this, _1, _2), IntervalPerLevel(level));
 
 
 			SetUpNextPeice();
@@ -193,27 +193,27 @@ public:
 		score = 0;
 		level = 0;
 
-		signalbroker.InvokeSignal<TetrisLogic::ScoreChangedHandler>("/tetris/scorechanged", score);
-		signalbroker.InvokeSignal<TetrisLogic::LevelChangedHandler>("/tetris/levelchanged", level);
+		signalbroker.InvokeSignal<PacmanLogic::ScoreChangedHandler>("/pacman/scorechanged", score);
+		signalbroker.InvokeSignal<PacmanLogic::LevelChangedHandler>("/pacman/levelchanged", level);
 
 		//reset update speed
-		signalbroker.InvokeSignal<TimerView::UpdateIntervalLengthHandler>("/timer/updateinterval", "/tetrislogic/processlogic", IntervalPerLevel(level));
+		signalbroker.InvokeSignal<TimerView::UpdateIntervalLengthHandler>("/timer/updateinterval", "/pacmanlogic/processlogic", IntervalPerLevel(level));
 		
 		//stop process logic interval
 		signalbroker.InvokeSignal
 			<TimerView::UnpauseIntervalHandler>
-			("/timer/unpauseinterval", "/tetrislogic/processlogic");
+			("/timer/unpauseinterval", "/pacmanlogic/processlogic");
 		//SetUpNextPeice();
 	}
 
 	void MovePlayerDown(){
 		if(initialized){
-			signalbroker.InvokeSignal<TimerView::UpdateIntervalLengthHandler>("/timer/updateinterval", "/tetrislogic/processlogic", IntervalPerLevel(level+6));
+			signalbroker.InvokeSignal<TimerView::UpdateIntervalLengthHandler>("/timer/updateinterval", "/pacmanlogic/processlogic", IntervalPerLevel(level+6));
 		}
 	}
 	void MovePlayerNormal(){
 		if(initialized){
-			signalbroker.InvokeSignal<TimerView::UpdateIntervalLengthHandler>("/timer/updateinterval", "/tetrislogic/processlogic", IntervalPerLevel(level));
+			signalbroker.InvokeSignal<TimerView::UpdateIntervalLengthHandler>("/timer/updateinterval", "/pacmanlogic/processlogic", IntervalPerLevel(level));
 		}
 	}
 
@@ -225,7 +225,7 @@ public:
 
 					if(CanMoveToLeft()){
 						signalbroker.InvokeSignal
-						<PacmanLogic::AbleToMoveHandler>("/tetrislogic/abletomove");
+						<PacmanLogic::AbleToMoveHandler>("/pacmanlogic/abletomove");
 
 						{
 							std::stringstream ss;
@@ -245,7 +245,7 @@ public:
 
 					}else{
 						signalbroker.InvokeSignal
-						<TetrisLogic::UnableToMoveHandler>("/tetrislogic/unabletomove");
+						<PacmanLogic::UnableToMoveHandler>("/pacmanlogic/unabletomove");
 					}
 				}
 			}
@@ -258,12 +258,12 @@ public:
 
 					if(CanMoveToRight()){
 						signalbroker.InvokeSignal
-						<PacmanLogic::AbleToMoveHandler>("/tetrislogic/abletomove");
+						<PacmanLogic::AbleToMoveHandler>("/pacmanlogic/abletomove");
 
 						mcurrentpieceposition(0,3)+=24;
 					}else{
 						signalbroker.InvokeSignal
-						<PacmanLogic::UnableToMoveHandler>("/tetrislogic/unabletomove");
+						<PacmanLogic::UnableToMoveHandler>("/pacmanlogic/unabletomove");
 					}
 				}
 			}
@@ -274,7 +274,7 @@ public:
 			if(initialized){
 				if(CanRotate()){
 					signalbroker.InvokeSignal
-					<PacmanLogic::AbleToRotateHandler>("/tetrislogic/abletorotate");
+					<PacmanLogic::AbleToRotateHandler>("/pacmanlogic/abletorotate");
 
 					bounded_matrix<float,4,4> center(identity_matrix<float>(4));
 
@@ -332,7 +332,7 @@ public:
 					}
 				}else{
 					signalbroker.InvokeSignal
-					<PacmanLogic::UnableToRotateHandler>("/tetrislogic/unabletorotate");
+					<PacmanLogic::UnableToRotateHandler>("/pacmanlogic/unabletorotate");
 				}
 			}
 		}
@@ -342,7 +342,7 @@ protected:
 		//current piece hit bottom?
 		if(StopCurrentPiece()){
 			signalbroker.InvokeSignal
-			<PacmanLogic::CurrentPieceStoppedHandler>("/tetrislogic/currentpiecestopped");
+			<PacmanLogic::CurrentPieceStoppedHandler>("/pacmanlogic/currentpiecestopped");
 
 			MoveCurrentPieceIntoLines();
 			RemoveCompleteRows();
@@ -351,43 +351,43 @@ protected:
 				//lose condition, next piece immediately stopped :(
 				signalbroker.InvokeSignal
 				<PacmanLogic::GameOverHandler>
-				("/tetrislogic/gameover");
+				("/pacmanlogic/gameover");
 
 				//stop updating logic, we're exiting to highscores or enter name menu
-				signalbroker.InvokeSignal
+				/*signalbroker.InvokeSignal
 					<PacmanLogic::PauseIntervalHandler>
-					("/timer/pauseinterval", "/tetrislogic/processlogic");
+					("/timer/pauseinterval", "/pacmanlogic/processlogic");*/
 
 				//check for high score
-				TetrisDB tetrisdb;
-				if(tetrisdb.QualifiesForHighScore(score)){
+				PacmanDB pacmandb;
+				if(pacmandb.QualifiesForHighScore(score)){
 					signalbroker.InvokeSignal
-						<TetrisEnterNameGUIController::RefreshSharedScoreHandler>
-						("/tetrisenternamegui/refreshsharedscore", score);
+						<PacmanEnterNameGUIController::RefreshSharedScoreHandler>
+						("/pacmanenternamegui/refreshsharedscore", score);
 					//If has high score
 					
 
 					//enter name
 					signalbroker.InvokeSignal
 						<GamestateController::StateChangeHandler>
-						("/tetrisgamestatecontroller/endgame");
+						("/pacmangamestatecontroller/endgame");
 
 				}else{
 					//else quit and go to high scores list
 					signalbroker.InvokeSignal
 						<GamestateController::StateChangeHandler>
-						("/tetrisgamestatecontroller/quit");
+						("/pacmangamestatecontroller/quit");
 
 					signalbroker.InvokeSignal
 						<GamestateController::StateChangeHandler>
-						("/tetrisgamestatecontroller/enterhighscores");
+						("/pacmangamestatecontroller/enterhighscores");
 				}
 				
 				return;
 
 			}
 			//reset update speed
-			signalbroker.InvokeSignal<TimerView::UpdateIntervalLengthHandler>("/timer/updateinterval", "/tetrislogic/processlogic", IntervalPerLevel(level));
+			signalbroker.InvokeSignal<TimerView::UpdateIntervalLengthHandler>("/timer/updateinterval", "/pacmanlogic/processlogic", IntervalPerLevel(level));
 		}
 
 		//drop current piece down
@@ -716,11 +716,11 @@ protected:
 	void IncrementScore(int rowscleared){
 		if(rowscleared>0){
 			score+=rowscleared*std::pow(1.5, level)*100;
-			signalbroker.InvokeSignal<TetrisLogic::ScoreChangedHandler>("/tetris/scorechanged", score);
+			signalbroker.InvokeSignal<PacmanLogic::ScoreChangedHandler>("/pacman/scorechanged", score);
 			int newlevel = score/1000;
 			if(newlevel > level){
 				level = newlevel;
-				signalbroker.InvokeSignal<TetrisLogic::LevelChangedHandler>("/tetris/levelchanged", level);
+				signalbroker.InvokeSignal<PacmanLogic::LevelChangedHandler>("/pacman/levelchanged", level);
 			}
 			
 		}
@@ -760,4 +760,4 @@ protected:
 	}
 };
 
-#endif /* TETRISLOGIC_HPP_ */
+#endif /* PACMANLOGIC_HPP_ */

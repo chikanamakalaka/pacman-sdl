@@ -1,15 +1,15 @@
 /*
- * SDLTetrisAudio.hpp
+ * SDLPacmanAudio.hpp
  *
  *  Created on: Jun 26, 2009
  *      Author: asantos
  */
 
-#ifndef SDLTETRISAUDIO_HPP_
-#define SDLTETRISAUDIO_HPP_
+#ifndef SDLPACMANAUDIO_HPP_
+#define SDLPACMANAUDIO_HPP_
 
 
-class SDLTetrisAudio{
+class SDLPacmanAudio{
 public:
 	typedef void(RefreshVolumeHandler)();
 private:
@@ -32,7 +32,7 @@ private:
 
 	std::set<int> usedchannels;
 public:
-	SDLTetrisAudio(SignalBroker& signalbroker):
+	SDLPacmanAudio(SignalBroker& signalbroker):
 		signalbroker(signalbroker){
 		if(SDL_InitSubSystem(SDL_INIT_AUDIO) == -1){
 		    // SDL Audio subsystem could not be started
@@ -120,57 +120,57 @@ public:
 		}
 
 		signalbroker.ConnectToSignal
-			<TetrisLogic::LoadInitialStateHandler>
+			<PacmanLogic::LoadInitialStateHandler>
 			("/logic/loadinitialstate",
-			boost::bind(&SDLTetrisAudio::PlayChunk, this, this->newgamechunk));
+			boost::bind(&SDLPacmanAudio::PlayChunk, this, this->newgamechunk));
 
 		signalbroker.ConnectToSignal
-			<TetrisLogic::ScoreChangedHandler>
-			("/tetris/scorechanged",
-			boost::bind(&SDLTetrisAudio::PlayChunk, this, this->scorechangedchunk));
+			<PacmanLogic::ScoreChangedHandler>
+			("/pacman/scorechanged",
+			boost::bind(&SDLPacmanAudio::PlayChunk, this, this->scorechangedchunk));
 
 		signalbroker.ConnectToSignal
-			<TetrisLogic::LevelChangedHandler>
-			("/tetris/levelchanged",
-			boost::bind(&SDLTetrisAudio::PlayChunk, this, this->levelchangedchunk));
+			<PacmanLogic::LevelChangedHandler>
+			("/pacman/levelchanged",
+			boost::bind(&SDLPacmanAudio::PlayChunk, this, this->levelchangedchunk));
 
 		signalbroker.ConnectToSignal
-			<TetrisLogic::AbleToMoveHandler>
-			("/tetrislogic/abletomove",
-			boost::bind(&SDLTetrisAudio::PlayChunk, this, this->abletomovechunk));
+			<PacmanLogic::AbleToMoveHandler>
+			("/pacmanlogic/abletomove",
+			boost::bind(&SDLPacmanAudio::PlayChunk, this, this->abletomovechunk));
 
 		signalbroker.ConnectToSignal
-			<TetrisLogic::UnableToMoveHandler>
-			("/tetrislogic/unabletomove",
-			boost::bind(&SDLTetrisAudio::PlayChunk, this, this->unabletomovechunk));
+			<PacmanLogic::UnableToMoveHandler>
+			("/pacmanlogic/unabletomove",
+			boost::bind(&SDLPacmanAudio::PlayChunk, this, this->unabletomovechunk));
 
 		signalbroker.ConnectToSignal
-			<TetrisLogic::GameOverHandler>
-			("/tetrislogic/gameover",
-			boost::bind(&SDLTetrisAudio::PlayChunk, this, this->gameoverchunk));
+			<PacmanLogic::GameOverHandler>
+			("/pacmanlogic/gameover",
+			boost::bind(&SDLPacmanAudio::PlayChunk, this, this->gameoverchunk));
 
 		signalbroker.ConnectToSignal
-			<TetrisLogic::AbleToRotateHandler>
-			("/tetrislogic/abletorotate",
-			boost::bind(&SDLTetrisAudio::PlayChunk, this, this->abletorotatechunk));
+			<PacmanLogic::AbleToRotateHandler>
+			("/pacmanlogic/abletorotate",
+			boost::bind(&SDLPacmanAudio::PlayChunk, this, this->abletorotatechunk));
 
 		signalbroker.ConnectToSignal
-			<TetrisLogic::UnableToRotateHandler>
-			("/tetrislogic/unabletorotate",
-			boost::bind(&SDLTetrisAudio::PlayChunk, this, this->unabletorotatechunk));
+			<PacmanLogic::UnableToRotateHandler>
+			("/pacmanlogic/unabletorotate",
+			boost::bind(&SDLPacmanAudio::PlayChunk, this, this->unabletorotatechunk));
 
 		signalbroker.ConnectToSignal
-			<TetrisLogic::CurrentPieceStoppedHandler>
-			("/tetrislogic/currentpiecestopped",
-			boost::bind(&SDLTetrisAudio::PlayChunk, this, this->currentpiecestoppedchunk));
+			<PacmanLogic::CurrentPieceStoppedHandler>
+			("/pacmanlogic/currentpiecestopped",
+			boost::bind(&SDLPacmanAudio::PlayChunk, this, this->currentpiecestoppedchunk));
 
 		signalbroker.ConnectToSignal
-			<SDLTetrisAudio::RefreshVolumeHandler>
-			("/tetrisaudio/refreshvolume",
-			boost::bind(&SDLTetrisAudio::Initialize, this));
+			<SDLPacmanAudio::RefreshVolumeHandler>
+			("/pacmanaudio/refreshvolume",
+			boost::bind(&SDLPacmanAudio::Initialize, this));
 
 	}
-	~SDLTetrisAudio(){
+	~SDLPacmanAudio(){
 		Mix_HaltMusic();
 		Mix_FreeMusic(music);
 
@@ -219,9 +219,9 @@ public:
 		}
 	}
 	void Initialize(){
-		TetrisDB tetrisdb;
-		musicvolume = tetrisdb.GetVolumeValueByName("Music");
-		soundvolume = tetrisdb.GetVolumeValueByName("Effects");
+		PacmanDB pacmandb;
+		musicvolume = pacmandb.GetVolumeValueByName("Music");
+		soundvolume = pacmandb.GetVolumeValueByName("Effects");
 		for(int channel=0; channel<16; channel++){
 			Mix_Volume(channel, std::min(soundvolume, MIX_MAX_VOLUME));
 		}
@@ -231,4 +231,4 @@ public:
 	}
 };
 
-#endif /* SDLTETRISAUDIO_HPP_ */
+#endif /* SDLPACMANAUDIO_HPP_ */

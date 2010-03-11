@@ -1,5 +1,5 @@
 /*
- * TetrisConfigurationMenuController.hpp
+ * PacmanConfigurationMenuController.hpp
  *
  *  Created on: Jan 20, 2010
  *      Author: asantos

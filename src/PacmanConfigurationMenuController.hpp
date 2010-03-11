@@ -1,16 +1,16 @@
 /*
- * TetrisConfigurationMenuController.hpp
+ * PacmanConfigurationMenuController.hpp
  *
  *  Created on: Jan 20, 2010
  *      Author: asantos
  */
 
-#ifndef TETRISCONFIGURATIONMENUCONTROLLER_HPP_
-#define TETRISCONFIGURATIONMENUCONTROLLER_HPP_
+#ifndef PACMANCONFIGURATIONMENUCONTROLLER_HPP_
+#define PACMANCONFIGURATIONMENUCONTROLLER_HPP_
 
 #include <boost/bimap.hpp>
 #include "XMLGuiChanMenuController.hpp"
-class TetrisConfigurationMenuController:public XMLGuiChanMenuController{
+class PacmanConfigurationMenuController:public XMLGuiChanMenuController{
 private:
 	SignalBroker& signalbroker;
 	const std::string menuname;
@@ -45,16 +45,16 @@ private:
 	MenuItemMouseListener* backmouselistener;
 
 public:
-	TetrisConfigurationMenuController(SignalBroker& signalbroker):
+	PacmanConfigurationMenuController(SignalBroker& signalbroker):
 		XMLGuiChanMenuController(signalbroker, "ConfigurationMenu", "Configuration"),
 		signalbroker(signalbroker),
 		menuname("ConfigurationMenu")
 		{
 		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output",
-			"TetrisConfigurationMenuController::TetrisConfigurationMenuController():this->signalnamespace==" + this->signalnamespace);
+			"PacmanConfigurationMenuController::PacmanConfigurationMenuController():this->signalnamespace==" + this->signalnamespace);
 
 	}
-	virtual ~TetrisConfigurationMenuController(){
+	virtual ~PacmanConfigurationMenuController(){
 
 		if(IsMenuInitialized()){
 			delete font;
@@ -71,7 +71,7 @@ public:
 	}
 protected:
 	virtual void CreateMenu(const std::string& name, boost::shared_ptr<SceneGraph> scenegraph){
-		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loading Tetris ConfigurationMenu");
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loading Pacman ConfigurationMenu");
 
 		SDL_EnableUNICODE(1);
 		SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
@@ -99,13 +99,13 @@ protected:
 
 		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Finding GuiChan widgets");
 
-		TetrisDB tetrisdb;
+		PacmanDB pacmandb;
 
 		musicvolumeslider = dynamic_cast<gcn::Slider*>(xmlgui->getWidget("musicvolumeslider"));
 		effectsvolumeslider = dynamic_cast<gcn::Slider*>(xmlgui->getWidget("soundeffectvolumeslider"));
 
-		musicvolumeslider->setValue(tetrisdb.GetVolumeValueByName("Music"));
-		effectsvolumeslider->setValue(tetrisdb.GetVolumeValueByName("Effects"));
+		musicvolumeslider->setValue(pacmandb.GetVolumeValueByName("Music"));
+		effectsvolumeslider->setValue(pacmandb.GetVolumeValueByName("Effects"));
 
 		lefttextfield = dynamic_cast<gcn::TextField*>(xmlgui->getWidget("lefttextfield"));
 		righttextfield = dynamic_cast<gcn::TextField*>(xmlgui->getWidget("righttextfield"));
@@ -123,30 +123,30 @@ protected:
 		downtextfield->addKeyListener(downkeyboardbindingkeylistener);
 		rotatetextfield->addKeyListener(rotatekeyboardbindingkeylistener);
 
-		boost::bimap<int, std::string> keybindings = tetrisdb.GetKeyBindings();
+		boost::bimap<int, std::string> keybindings = pacmandb.GetKeyBindings();
 
 		std::string lefttext;
 		{
 			boost::bimap<int, std::string>::right_const_iterator itr = keybindings.right.find("Left");
-			lefttext = tetrisdb.GetKeyNameByValue(itr->second);
+			lefttext = pacmandb.GetKeyNameByValue(itr->second);
 			leftkeyvalue = itr->second;
 		}
 		std::string righttext;
 		{
 			boost::bimap<int, std::string>::right_const_iterator itr = keybindings.right.find("Right");
-			righttext = tetrisdb.GetKeyNameByValue(itr->second);
+			righttext = pacmandb.GetKeyNameByValue(itr->second);
 			rightkeyvalue = itr->second;
 		}
 		std::string downtext;
 		{
 			boost::bimap<int, std::string>::right_const_iterator itr = keybindings.right.find("Down");
-			downtext = tetrisdb.GetKeyNameByValue(itr->second);
+			downtext = pacmandb.GetKeyNameByValue(itr->second);
 			downkeyvalue = itr->second;
 		}
 		std::string rotatetext;
 		{
 			boost::bimap<int, std::string>::right_const_iterator itr = keybindings.right.find("Rotate");
-			rotatetext = tetrisdb.GetKeyNameByValue(itr->second);
+			rotatetext = pacmandb.GetKeyNameByValue(itr->second);
 			rotatekeyvalue = itr->second;
 		}
 
@@ -171,7 +171,7 @@ protected:
 		boost::shared_ptr<IRenderable> guichangui(new GuiChanGui(gui));
 		scenegraph->GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
 
-		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded Tetris Main Menu");
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded Pacman Main Menu");
 
 		MenuInitialized();
 	}
@@ -183,28 +183,28 @@ protected:
 	}
 	void MenuItemClicked(const std::string& name, gcn::Label* label){
 		if(name == "apply"){
-			TetrisDB tetrisdb;
-			tetrisdb.SetVolume("Music", static_cast<int>(this->musicvolumeslider->getValue()));
-			tetrisdb.SetVolume("Effects", static_cast<int>(this->effectsvolumeslider->getValue()));
+			PacmanDB pacmandb;
+			pacmandb.SetVolume("Music", static_cast<int>(this->musicvolumeslider->getValue()));
+			pacmandb.SetVolume("Effects", static_cast<int>(this->effectsvolumeslider->getValue()));
 
-			tetrisdb.SetKeyBinding("Left", this->leftkeyvalue);
-			tetrisdb.SetKeyBinding("Right", this->rightkeyvalue);
-			tetrisdb.SetKeyBinding("Down", this->downkeyvalue);
-			tetrisdb.SetKeyBinding("Rotate", this->rotatekeyvalue);
+			pacmandb.SetKeyBinding("Left", this->leftkeyvalue);
+			pacmandb.SetKeyBinding("Right", this->rightkeyvalue);
+			pacmandb.SetKeyBinding("Down", this->downkeyvalue);
+			pacmandb.SetKeyBinding("Rotate", this->rotatekeyvalue);
 
-
-			signalbroker.InvokeSignal
-				<SDLTetrisAudio::RefreshVolumeHandler>
-				("/tetrisaudio/refreshvolume");
 
 			signalbroker.InvokeSignal
-				<TetrisInputView::RefreshKeyBindingsHandler>
-				("/tetrisinput/refreshkeybindings");
+				<SDLPacmanAudio::RefreshVolumeHandler>
+				("/pacmanaudio/refreshvolume");
+
+			signalbroker.InvokeSignal
+				<InputView::RefreshKeyBindingsHandler>
+				("/pacmaninput/refreshkeybindings");
 		}
 
 		signalbroker.InvokeSignal
 			<GamestateController::StateChangeHandler>
-			("/tetrisgamestatecontroller/quit");
+			("/pacmangamestatecontroller/quit");
 	}
 	void MenuItemEntered(const std::string& name, gcn::Label* label){
 		label->setFont(hoverfont);
@@ -213,9 +213,10 @@ protected:
 		label->setFont(font);
 	}
 	void KeyBindingKeyPressed(gcn::TextField* textfield, const std::string& name, int keyvalue){
-		TetrisDB tetrisdb;
-		textfield->setText(tetrisdb.GetKeyNameByValue(keyvalue));
-
+		PacmanDB pacmandb;
+		std::string keyname = pacmandb.GetKeyNameByValue(keyvalue);
+		textfield->setText(keyname);
+		std::cout<<"ConfigMenu:KeyBindingKeyPressed "<<keyname<<std::endl;
 		if(name=="left"){
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "set left value");
 
@@ -234,4 +235,4 @@ protected:
 
 };
 
-#endif /* TETRISCONFIGURATIONMENUCONTROLLER_HPP_ */
+#endif /* PACMANCONFIGURATIONMENUCONTROLLER_HPP_ */

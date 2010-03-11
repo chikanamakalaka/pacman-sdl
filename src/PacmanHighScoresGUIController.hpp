@@ -1,16 +1,16 @@
 /*
- * TetrisMainMenuController.hpp
+ * PacmanMainMenuController.hpp
  *
  *  Created on: Aug 26, 2009
  *      Author: asantos
  */
 
-#ifndef TETRISHIGHSCORESGUICONTROLLER_HPP_
-#define TETRISHIGHSCORESGUICONTROLLER_HPP_
+#ifndef PACMANHIGHSCORESGUICONTROLLER_HPP_
+#define PACMANHIGHSCORESGUICONTROLLER_HPP_
 
 #include "XMLGuiChanMenuController.hpp"
 
-class TetrisHighScoresGUIController:public XMLGuiChanMenuController{
+class PacmanHighScoresGUIController:public XMLGuiChanMenuController{
 public:
 	typedef void(ReloadHighScoresHandler)();
 private:
@@ -26,21 +26,21 @@ private:
 	MenuItemMouseListener* continuemouselistener;
 
 public:
-	TetrisHighScoresGUIController(SignalBroker& signalbroker):
+	PacmanHighScoresGUIController(SignalBroker& signalbroker):
 		XMLGuiChanMenuController(signalbroker, "HighScoresMenu", "HighScores"),
 		signalbroker(signalbroker),
 		menuname("HighScoresMenu")
 		{
 
 		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output",
-			"TetrisHighScoresGUIController::TetrisHighScoresGUIController():this->signalnamespace==" + this->signalnamespace);
+			"PacmanHighScoresGUIController::PacmanHighScoresGUIController():this->signalnamespace==" + this->signalnamespace);
 
 		signalbroker.ConnectToSignal
-		<TetrisHighScoresGUIController::ReloadHighScoresHandler>
+		<PacmanHighScoresGUIController::ReloadHighScoresHandler>
 		(	"/highscores/reload",
-			boost::bind(&TetrisHighScoresGUIController::ReloadHighScores, this));
+			boost::bind(&PacmanHighScoresGUIController::ReloadHighScores, this));
 	}
-	virtual ~TetrisHighScoresGUIController(){
+	virtual ~PacmanHighScoresGUIController(){
 		if(IsMenuInitialized()){
 			delete font;
 			delete hoverfont;
@@ -50,7 +50,7 @@ public:
 	}
 protected:
 	virtual void CreateMenu(const std::string& name, boost::shared_ptr<SceneGraph> scenegraph){
-		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loading Tetris HighScoresGUI");
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loading Pacman HighScoresGUI");
 
 		SDL_EnableUNICODE(1);
 		SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
@@ -98,9 +98,9 @@ protected:
 
 		std::string highscoresstr;
 		std::stringstream ss;
-		TetrisDB tetrisdb;
-		std::list<TetrisDB::Score> highscores = tetrisdb.HighScores();
-		std::list<TetrisDB::Score>::const_iterator itr = highscores.begin();
+		PacmanDB pacmandb;
+		std::list<PacmanDB::Score> highscores = pacmandb.HighScores();
+		std::list<PacmanDB::Score>::const_iterator itr = highscores.begin();
 
 		if(itr!=highscores.end()){
 			for(int i=0;itr!=highscores.end();itr++,i++){
@@ -112,7 +112,7 @@ protected:
 		boost::shared_ptr<IRenderable> guichangui(new GuiChanGui(gui));
 		scenegraph->GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
 
-		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded Tetris HighScoresGUI");
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded Pacman HighScoresGUI");
 
 		MenuInitialized();
 	}
@@ -120,9 +120,9 @@ protected:
 
 		std::string highscoresstr;
 		std::stringstream ss;
-		TetrisDB tetrisdb;
-		std::list<TetrisDB::Score> highscores = tetrisdb.HighScores();
-		std::list<TetrisDB::Score>::const_iterator itr = highscores.begin();
+		PacmanDB pacmandb;
+		std::list<PacmanDB::Score> highscores = pacmandb.HighScores();
+		std::list<PacmanDB::Score>::const_iterator itr = highscores.begin();
 
 		if(itr!=highscores.end()){
 			for(int i=0;itr!=highscores.end();itr++,i++){
@@ -139,7 +139,7 @@ protected:
 	void MenuItemClicked(const std::string& name, gcn::Label* label){
 		signalbroker.InvokeSignal
 			<GamestateController::StateChangeHandler>
-			("/tetrisgamestatecontroller/"+name);
+			("/pacmangamestatecontroller/"+name);
 	}
 	void MenuItemEntered(const std::string& name, gcn::Label* label){
 		label->setFont(hoverfont);
@@ -156,4 +156,4 @@ protected:
 
 };
 
-#endif /* TETRISHIGHSCORESGUICONTROLLER_HPP_ */
+#endif /* PACMANHIGHSCORESGUICONTROLLER_HPP_ */

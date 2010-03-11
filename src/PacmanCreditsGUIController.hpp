@@ -1,16 +1,16 @@
 /*
- * TetrisMainMenuController.hpp
+ * PacmanMainMenuController.hpp
  *
  *  Created on: Aug 26, 2009
  *      Author: asantos
  */
 
-#ifndef TETRISCREDITSGUICONTROLLER_HPP_
-#define TETRISCREDITSGUICONTROLLER_HPP_
+#ifndef PACMANCREDITSGUICONTROLLER_HPP_
+#define PACMANCREDITSGUICONTROLLER_HPP_
 
 #include "XMLGuiChanMenuController.hpp"
 
-class TetrisCreditsGUIController:public XMLGuiChanMenuController{
+class PacmanCreditsGUIController:public XMLGuiChanMenuController{
 private:
 	SignalBroker& signalbroker;
 	const std::string menuname;
@@ -22,16 +22,16 @@ private:
 	MenuItemMouseListener* continuemouselistener;
 
 public:
-	TetrisCreditsGUIController(SignalBroker& signalbroker):
+	PacmanCreditsGUIController(SignalBroker& signalbroker):
 		XMLGuiChanMenuController(signalbroker, "CreditsMenu", "Credits"),
 		signalbroker(signalbroker),
 		menuname("CreditsMenu")
 		{
 
 		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output",
-			"TetrisCreditsGUIController::TetrisCreditsGUIController():this->signalnamespace==" + this->signalnamespace);
+			"PacmanCreditsGUIController::PacmanCreditsGUIController():this->signalnamespace==" + this->signalnamespace);
 	}
-	virtual ~TetrisCreditsGUIController(){
+	virtual ~PacmanCreditsGUIController(){
 
 		if(IsMenuInitialized()){
 			delete font;
@@ -42,7 +42,7 @@ public:
 	}
 protected:
 	virtual void CreateMenu(const std::string& name, boost::shared_ptr<SceneGraph> scenegraph){
-		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loading Tetris CreditsGUI");
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loading Pacman CreditsGUI");
 
 		SDL_EnableUNICODE(1);
 		SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
@@ -82,7 +82,7 @@ protected:
 		boost::shared_ptr<IRenderable> guichangui(new GuiChanGui(gui));
 		scenegraph->GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
 
-		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded Tetris HighScoresGUI");
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded Pacman HighScoresGUI");
 
 		MenuInitialized();
 	}
@@ -95,7 +95,7 @@ protected:
 	void MenuItemClicked(const std::string& name, gcn::Label* label){
 		signalbroker.InvokeSignal
 			<GamestateController::StateChangeHandler>
-			("/tetrisgamestatecontroller/"+name);
+			("/pacmangamestatecontroller/"+name);
 	}
 	void MenuItemEntered(const std::string& name, gcn::Label* label){
 		label->setFont(hoverfont);
@@ -112,4 +112,4 @@ protected:
 
 };
 
-#endif /* TETRISHIGHSCORESGUICONTROLLER_HPP_ */
+#endif /* PACMANHIGHSCORESGUICONTROLLER_HPP_ */
