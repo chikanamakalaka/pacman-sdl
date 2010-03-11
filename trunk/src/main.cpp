@@ -35,25 +35,25 @@
 #include "ClockView.hpp"
 #include "TimerView.hpp"
 #include "OpenGL/util.hpp"
-#include "TetrisDB.hpp"
+#include "PacmanDB.hpp"
 #include "SceneNodeProperties.hpp"
 #include "SceneGraphController.hpp"
 #include "GamestateController.hpp"
 #include "AnimationController.hpp"
 #include "SDLEventsView.hpp"
-#include "TetrisInputView.hpp"
+#include "InputView.hpp"
 #include "SDLRenderView.hpp"
 #include "OpenGLRenderView.hpp"
 #include "GuiChanRenderView.hpp"
-#include "TetrisEnterNameGUIController.hpp"
+#include "PacmanEnterNameGUIController.hpp"
 #include "PacmanLogic.hpp"
-#include "TetrisHighScoresGUIController.hpp"
+#include "PacmanHighScoresGUIController.hpp"
 #include "PacmanGamestateLoader.hpp"
 #include "SDLTetrisAudio.hpp"
-#include "TetrisMainMenuController.hpp"
-#include "TetrisConfigurationMenuController.hpp"
-#include "TetrisGameGUIController.hpp"
-#include "TetrisCreditsGUIController.hpp"
+#include "PacmanMainMenuController.hpp"
+#include "PacmanConfigurationMenuController.hpp"
+#include "PacmanGameGUIController.hpp"
+#include "PacmanCreditsGUIController.hpp"
 
 
 
@@ -102,16 +102,16 @@ int main(int argc, char *argv[]) try{
 
 
 	//application specific
-	TetrisInputView tetrisinputview(signalbroker);
+	InputView inputview(signalbroker);
 	//TetrisLogic tetrislogic(signalbroker);
 	//SDLTetrisAudio tetrisaudio(signalbroker);
 	PacmanGamestateLoader pacmangamestateloader(signalbroker);
-	TetrisMainMenuController tetrismainmenucontroller(signalbroker);
-	TetrisConfigurationMenuController tetrisconfigurationmenucontroller(signalbroker);
-	TetrisGameGUIController tetrisgameguicontroller(signalbroker);
-	TetrisEnterNameGUIController tetrisenternameguicontroller(signalbroker);
-	TetrisHighScoresGUIController tetrishighscoresguicontroller(signalbroker);
-	TetrisCreditsGUIController tetriscreditsguicontroller(signalbroker);
+	PacmanMainMenuController pacmanmainmenucontroller(signalbroker);
+	PacmanConfigurationMenuController pacmanconfigurationmenucontroller(signalbroker);
+	PacmanGameGUIController pacmangameguicontroller(signalbroker);
+	PacmanEnterNameGUIController pacmanenternameguicontroller(signalbroker);
+	PacmanHighScoresGUIController pacmanhighscoresguicontroller(signalbroker);
+	PacmanCreditsGUIController pacmancreditsguicontroller(signalbroker);
 	clockview.Start();
 
     return 0;

@@ -156,43 +156,43 @@ public:
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
-				"/Pacmangamestatecontroller/newgame",
+				"/pacmangamestatecontroller/newgame",
 				boost::bind(&PacmanGamestateLoader::NewGame, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
-				"/Pacmangamestatecontroller/endgame",
+				"/pacmangamestatecontroller/endgame",
 				boost::bind(&PacmanGamestateLoader::EndGame, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
-				"/Pacmangamestatecontroller/enteredname",
+				"/pacmangamestatecontroller/enteredname",
 				boost::bind(&PacmanGamestateLoader::EnteredName, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
-				"/Pacmangamestatecontroller/enterhighscores",
+				"/pacmangamestatecontroller/enterhighscores",
 				boost::bind(&PacmanGamestateLoader::EnterHighScores, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
-				"/Pacmangamestatecontroller/credits",
+				"/pacmangamestatecontroller/credits",
 				boost::bind(&PacmanGamestateLoader::EnterCredits, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
-				"/Pacmangamestatecontroller/configuration",
+				"/pacmangamestatecontroller/configuration",
 				boost::bind(&PacmanGamestateLoader::EnterConfiguration, this));
 
 		signalbroker.ConnectToSignal
 			<GamestateController::StateChangeHandler>
 			(
-				"/Pacmangamestatecontroller/quit",
+				"/pacmangamestatecontroller/quit",
 				boost::bind(&PacmanGamestateLoader::Quit, this));
 
 		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Initiating gamestates.");

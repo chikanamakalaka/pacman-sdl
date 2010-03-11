@@ -1,31 +1,31 @@
 /*
- * TetrisSharedState.hpp
+ * PacmanSharedState.hpp
  *
  *  Created on: Oct 22, 2009
  *      Author: asantos
  */
 
-#ifndef TETRISSHAREDSTATE_HPP_
-#define TETRISSHAREDSTATE_HPP_
+#ifndef PACMANSHAREDSTATE_HPP_
+#define PACMANSHAREDSTATE_HPP_
 
 #include "SignalBroker.hpp"
 
-class TetrisSharedState{
+class PacmanSharedState{
 public:
-	typedef void(GetTetrisSharedStateHandler)(TetrisSharedState*);
+	typedef void(GetPacmanSharedStateHandler)(PacmanSharedState*);
 private:
 	SignalBroker& signalbroker;
 	int highscore;
 public:
-	TetrisSharedState(SignalBroker& signalbroker):signalbroker(signalbroker), highscore(0){
+	PacmanSharedState(SignalBroker& signalbroker):signalbroker(signalbroker), highscore(0){
 		signalbroker.ConnectToSignal
 		<ClockView::TickHandler>
 		(	"/clock/tick",
-			boost::bind(&TetrisSharedState::GetTetrisSharedState, this, _1, _2));
+			boost::bind(&PacmanSharedState::GetPacmanSharedState, this, _1, _2));
 	}
 
-	void GetTetrisSharedState(long t, long dt){
-		signalbroker.InvokeSignal<GetTetrisSharedStateHandler>("/tetrissharedstate/get", this);
+	void GetPacmanSharedState(long t, long dt){
+		signalbroker.InvokeSignal<GetPacmanSharedStateHandler>("/pacmansharedstate/get", this);
 	}
 
 	int GetHighScore()const{
@@ -37,4 +37,4 @@ public:
 
 };
 
-#endif /* TETRISSHAREDSTATE_HPP_ */
+#endif /* PACMANSHAREDSTATE_HPP_ */

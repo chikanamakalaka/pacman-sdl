@@ -1,19 +1,19 @@
 /*
- * TetrisMainMenuController.hpp
+ * PacmanMainMenuController.hpp
  *
  *  Created on: Aug 26, 2009
  *      Author: asantos
  */
 
-#ifndef TETRISENTERNAMEGUICONTROLLER_HPP_
-#define TETRISENTERNAMEGUICONTROLLER_HPP_
+#ifndef PACMANENTERNAMEGUICONTROLLER_HPP_
+#define PACMANENTERNAMEGUICONTROLLER_HPP_
 
 #include <boost/format.hpp>
 
 #include "XMLGuiChanMenuController.hpp"
-#include "TetrisDB.hpp"
+#include "PacmanDB.hpp"
 
-class TetrisEnterNameGUIController:public XMLGuiChanMenuController{
+class PacmanEnterNameGUIController:public XMLGuiChanMenuController{
 public:
 	typedef void(RefreshSharedScoreHandler)(int);
 private:
@@ -30,21 +30,21 @@ private:
 	MenuItemMouseListener* continuemouselistener;
 
 public:
-	TetrisEnterNameGUIController(SignalBroker& signalbroker):
+	PacmanEnterNameGUIController(SignalBroker& signalbroker):
 		XMLGuiChanMenuController(signalbroker, "EnterNameMenu", "EnterName"),
 		signalbroker(signalbroker),
 		menuname("EnterNameMenu")
 		{
 		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output",
-			"TetrisEnterNameGUIController::TetrisEnterNameGUIController():this->signalnamespace==" + this->signalnamespace);
+			"PacmanEnterNameGUIController::PacmanEnterNameGUIController():this->signalnamespace==" + this->signalnamespace);
 
 		signalbroker.ConnectToSignal
-		<TetrisEnterNameGUIController::RefreshSharedScoreHandler>
-		(	"/tetrisenternamegui/refreshsharedscore",
-			boost::bind(&TetrisEnterNameGUIController::RefreshSharedScore, this, _1));
+		<PacmanEnterNameGUIController::RefreshSharedScoreHandler>
+		(	"/pacmanenternamegui/refreshsharedscore",
+			boost::bind(&PacmanEnterNameGUIController::RefreshSharedScore, this, _1));
 			
 	}
-	virtual ~TetrisEnterNameGUIController(){
+	virtual ~PacmanEnterNameGUIController(){
 		if(IsMenuInitialized()){
 			delete font;
 			delete hoverfont;
@@ -54,7 +54,7 @@ public:
 	}
 protected:
 	virtual void CreateMenu(const std::string& name, boost::shared_ptr<SceneGraph> scenegraph){
-		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loading Tetris EnterNameGUI");
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loading Pacman EnterNameGUI");
 
 		SDL_EnableUNICODE(1);
 		SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
@@ -96,7 +96,7 @@ protected:
 		boost::shared_ptr<IRenderable> guichangui(new GuiChanGui(gui));
 		scenegraph->GetRoot().AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(guichangui)));
 
-		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded Tetris EnterNameGUI");
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Loaded Pacman EnterNameGUI");
 
 		MenuInitialized();
 	}
@@ -113,14 +113,14 @@ protected:
 	}
 	void MenuItemClicked(const std::string& name, gcn::Label* label){
 		if(name == "enteredname"){
-			TetrisDB tetrisdb;
-			tetrisdb.AddScore(highscore, this->name->getText());
+			PacmanDB pacmandb;
+			pacmandb.AddScore(highscore, this->name->getText());
 
 		}
 		
 		signalbroker.InvokeSignal
 			<GamestateController::StateChangeHandler>
-			("/tetrisgamestatecontroller/"+name);
+			("/pacmangamestatecontroller/"+name);
 
 	}
 	void MenuItemEntered(const std::string& name, gcn::Label* label){
@@ -138,4 +138,4 @@ protected:
 
 };
 
-#endif /* TETRISENTERNAMEGUICONTROLLER_HPP_ */
+#endif /* PACMANENTERNAMEGUICONTROLLER_HPP_ */
