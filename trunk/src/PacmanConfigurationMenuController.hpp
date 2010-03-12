@@ -194,7 +194,7 @@ protected:
 
 
 			signalbroker.InvokeSignal
-				<SDLPacmanAudio::RefreshVolumeHandler>
+				<SDLAudio::RefreshVolumeHandler>
 				("/pacmanaudio/refreshvolume");
 
 			signalbroker.InvokeSignal
