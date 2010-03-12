@@ -13,6 +13,38 @@
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 
+class SoundBinding{
+	std::string event;
+	std::string filename;
+public:
+	SoundBinding(const std::string& event, const std::string& filename):event(event), filename(filename){}
+	const std::string& GetEvent()const{
+		return event;
+	}
+	const std::string& GetFilename()const{
+		return filename;
+	}
+};
+class MusicBinding{
+	std::string event;
+	std::string filename;
+	int fadeintime;
+	int fadeouttime;
+public:
+	MusicBinding(const std::string& event, const std::string& filename, int fadeintime, int fadeouttime):event(event), filename(filename), fadeintime(fadeintime), fadeouttime(fadeouttime){}
+	const std::string& GetEvent()const{
+		return event;
+	}
+	const std::string& GetFilename()const{
+		return filename;
+	}
+	const int GetFadeInTime()const{
+		return fadeintime;
+	}
+	const int GetFadeOutTime()const{
+		return fadeouttime;
+	}
+};
 class PacmanDBException : public virtual std::exception{
 private:
 		const char* msg;
@@ -579,6 +611,126 @@ public:
 		return keyheldbindings;
 	}
 
+	std::vector<SoundBinding> GetSoundBindings(){
+		std::vector<SoundBinding> soundbindings;
+
+		char* zErrMsg = 0;
+		char** result ;
+		int rc = 0;
+		int nrow,ncol;
+		std::vector<std::string> vcol_head;
+		std::vector<std::string> vdata;
+
+
+		const std::string sql("SELECT Event, Filename FROM SoundBindings");
+
+		rc = sqlite3_get_table(
+			db,              /* An open database */
+			sql.c_str(),       /* SQL to be executed */
+			&result,       /* Result written to a char *[]  that this points to */
+			&nrow,             /* Number of result rows written here */
+			&ncol,          /* Number of result columns written here */
+			&zErrMsg          /* Error msg written here */
+			);
+
+
+		if( rc == SQLITE_OK ){
+			for(int i=0; i < ncol; ++i){
+				vcol_head.push_back(result[i]);   /* First row heading */
+			}
+			for(int i=0; i < ncol*nrow; ++i){
+				vdata.push_back(result[ncol+i]);
+			}
+		}
+		sqlite3_free_table(result);
+
+
+		int eventidx, filenameidx;
+
+		int idx=0;
+		for(std::vector<std::string>::const_iterator itr = vcol_head.begin(); itr!=vcol_head.end();itr++){
+			if(*itr=="Event"){
+				eventidx = idx;
+			}
+			else if(*itr=="Filename"){
+				filenameidx = idx;
+			}
+			idx++;
+		}
+
+		for(std::vector<std::string>::const_iterator itr = vdata.begin(); itr!=vdata.end(); itr+=vcol_head.size()){
+			std::string event = *(itr+eventidx);
+			std::string filename = *(itr+filenameidx);
+
+			soundbindings.push_back(SoundBinding(event, filename));
+		}
+
+		return soundbindings;
+	}
+	std::vector<MusicBinding> GetMusicBindings(){
+			std::vector<MusicBinding> musicbindings;
+
+			char* zErrMsg = 0;
+			char** result ;
+			int rc = 0;
+			int nrow,ncol;
+			std::vector<std::string> vcol_head;
+			std::vector<std::string> vdata;
+
+
+			const std::string sql("SELECT Event, Filename, FadeInTime, FadeOutTime FROM MusicBindings");
+
+			rc = sqlite3_get_table(
+				db,              /* An open database */
+				sql.c_str(),       /* SQL to be executed */
+				&result,       /* Result written to a char *[]  that this points to */
+				&nrow,             /* Number of result rows written here */
+				&ncol,          /* Number of result columns written here */
+				&zErrMsg          /* Error msg written here */
+				);
+
+
+			if( rc == SQLITE_OK ){
+				for(int i=0; i < ncol; ++i){
+					vcol_head.push_back(result[i]);   /* First row heading */
+				}
+				for(int i=0; i < ncol*nrow; ++i){
+					vdata.push_back(result[ncol+i]);
+				}
+			}
+			sqlite3_free_table(result);
+
+
+			int eventidx, filenameidx, fadeintimeidx, fadeouttimeidx;
+
+			int idx=0;
+			for(std::vector<std::string>::const_iterator itr = vcol_head.begin(); itr!=vcol_head.end();itr++){
+				if(*itr=="Event"){
+					eventidx = idx;
+				}
+				else if(*itr=="Filename"){
+					filenameidx = idx;
+				}
+				else if(*itr=="FadeInTime"){
+					fadeintimeidx = idx;
+				}
+				else if(*itr=="FadeOutTime"){
+					fadeouttimeidx = idx;
+				}
+				idx++;
+			}
+
+			for(std::vector<std::string>::const_iterator itr = vdata.begin(); itr!=vdata.end(); itr+=vcol_head.size()){
+				std::string event = *(itr+eventidx);
+				std::string filename = *(itr+filenameidx);
+				int fadeintime = boost::lexical_cast<int>(*(itr+fadeintimeidx));
+				int fadeouttime = boost::lexical_cast<int>(*(itr+fadeouttimeidx));
+
+				musicbindings.push_back(MusicBinding(event, filename, fadeintime, fadeouttime));
+			}
+
+			return musicbindings;
+		}
 };
 
 #endif /* PACMANDB_HPP_ */

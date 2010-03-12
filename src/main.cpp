@@ -49,7 +49,7 @@
 #include "PacmanLogic.hpp"
 #include "PacmanHighScoresGUIController.hpp"
 #include "PacmanGamestateLoader.hpp"
-#include "SDLTetrisAudio.hpp"
+#include "SDLAudio.hpp"
 #include "PacmanMainMenuController.hpp"
 #include "PacmanConfigurationMenuController.hpp"
 #include "PacmanGameGUIController.hpp"
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) try{
 	//application specific
 	InputView inputview(signalbroker);
 	//TetrisLogic tetrislogic(signalbroker);
-	//SDLTetrisAudio tetrisaudio(signalbroker);
+	SDLAudio sdlaudio(signalbroker);
 	PacmanGamestateLoader pacmangamestateloader(signalbroker);
 	PacmanMainMenuController pacmanmainmenucontroller(signalbroker);
 	PacmanConfigurationMenuController pacmanconfigurationmenucontroller(signalbroker);
