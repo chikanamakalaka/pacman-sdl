@@ -8,6 +8,8 @@
 #ifndef ANIMATIONS_HPP_
 #define ANIMATIONS_HPP_
 
+#include <cmath>
+
 
 class Spline{
 public:
@@ -39,7 +41,7 @@ public:
 	void AddKey(float time, const SplineKey& key){
 		keys.insert(std::pair<float, SplineKey>(time, key));
 	}
-	SplineKey GetCurrentKey(float time){
+	SplineKey GetCurrentKey(float time, bool loop)const{
 		//if has keys
 		if(keys.size() > 0){
 			//if only one key, return that key
@@ -52,7 +54,16 @@ public:
 			}
 			//if after latest time, return last key
 			else if(time > (--keys.end())->first){
-				return (--keys.end())->second;
+				if(loop){
+					//if looped animation and elapsed is past the end, loop the elapsed around to the start
+					time = std::fmod(time, (--keys.end())->first);
+					//see if elapsed is now before animation
+					if(time < keys.begin()->first){
+						return keys.begin()->second;
+					}
+				}else{
+					return (--keys.end())->second;
+				}
 			}else{
 				//else between two keys
 				std::map<float, SplineKey>::const_iterator itr = keys.begin();
@@ -96,19 +107,11 @@ public:
 					val+=val;
 				}
 				val = boost::math::norm(val);
-
+				//interpolate between positions
+				return SplineKey(Vector3(), val);
 			}
 		}
-		//if between first and last
-		//get key before
-		//get key after
-		//interpolate between before and after
-
-		//create and return interpolated key
-
-
 	}
-
 };
 
 class RotationAnimation:public IAnimation{
@@ -129,15 +132,31 @@ public:
 class SplineAnimation:public IAnimation{
 private:
 	const Spline spline;
+	State state;
+	float elapsed;
 	bool loop;
 public:
-	SplineAnimation(const Spline& spline, bool loop):spline(spline), loop(loop){}
+	SplineAnimation(const Spline& spline, bool loop):spline(spline), state(Paused), elapsed(0.0f), loop(loop){}
 	virtual void Animate(SceneNode& scenenode, float tf, float dtf){
-		PositionProperty& position = scenenode.GetSceneNodeProperty<PositionProperty>("position");
-
+		if(state == Playing){
+			elapsed+=dtf;
+			Spline::SplineKey splinekey = spline.GetCurrentKey(elapsed, loop);
+			PositionProperty& positionproperty = scenenode.GetSceneNodeProperty<PositionProperty>("position");
+			positionproperty.SetPosition(splinekey.GetMatrix4());
+		}
 	}
 	const std::string GetType()const{
 		return "splineanimation";
+	}
+	virtual void Play(){
+		state = Playing;
+	}
+	virtual void Pause(){
+		state = Paused;
+	}
+	virtual void Stop(){
+		state = Stopped;
+		elapsed = 0.0f;
 	}
 };
 
@@ -171,6 +190,12 @@ public:
 	}
 	void AddKey(float time, const std::vector<TextureAnimationKey>& key){
 		textureanimationkeys.insert(std::pair<float, std::vector<TextureAnimationKey> >(time, key));
+	}
+	virtual void Play(){
+	}
+	virtual void Pause(){
+	}
+	virtual void Stop(){
 	}
 };
 

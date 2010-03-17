@@ -4,7 +4,7 @@
  *  Created on: May 5, 2009
  *      Author: asantos
  */
-
+#include <cmath>
 
 #if defined(linux)
 	#ifndef GL_GLEXT_PROTOTYPES
@@ -205,12 +205,21 @@ public:
 						key = keys.begin();
 					}
 					//if before earliest time, return earliest key
-					else if(tf < keys.begin()->first){
+					else if(elapsed < keys.begin()->first){
 						key = keys.begin();
 					}
 					//if after latest time, return last key
 					else if(tf > (--keys.end())->first){
-						key = (--keys.end());
+						if(loop){
+							//if looped animation and elapsed is past the end, loop the elapsed around to the start
+							elapsed = std::fmod(elapsed, (--keys.end())->first);
+							//see if elapsed is now before animation
+							if(elapsed < keys.begin()->first){
+								key = keys.begin();
+							}
+						}else{
+							key = (--keys.end());
+						}
 					}else{
 						//else between two keys
 						std::map<float, std::vector<TextureAnimationKey> >::const_iterator itr = keys.begin();
