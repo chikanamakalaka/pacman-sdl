@@ -17,6 +17,10 @@
 class Vector2:public  boost::numeric::ublas::vector<float>{
 public:
 	Vector2(): boost::numeric::ublas::vector<float>(2){}
+	Vector2(float x1, float x2): boost::numeric::ublas::vector<float>(2){
+		(*this)(0) = x1;
+		(*this)(1) = x2;
+	}
 	~Vector2(){}
 };
 

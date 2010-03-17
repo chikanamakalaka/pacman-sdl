@@ -21,14 +21,6 @@
 
 #include "../math.hpp"
 
-class ITexture:public Cloneable<ITexture>{
-public:
-	virtual ~ITexture(){}
-	virtual void Bind()const{}
-	virtual void Unload()const{}
-};
-
-
 class UnableToCreateSurface : public virtual std::exception{
 private:
 		const char* msg;
@@ -49,6 +41,9 @@ public:
 		return "UnhandledSurfaceFormat";
 	}
 };
+
+namespace OpenGL{
+
 class VertexData{
 public:
 	float x, y, z;
@@ -56,175 +51,15 @@ public:
 	float r, g, b;
 	float nx, ny, nz;
 	float padding[5]; //pad to 64 byte boundary
-};
-class Vertex{
-private:
-	Vector4 position;
-	Vector4 normal;
-	Vector3 color;
-	Vector2 texturecoords;
-public:
-	Vertex( float x=0.0f, float y=0.0f, float z=0.0f,
-			float tu=0.0f, float tv=0.0f,
-			float nx=0.0f, float ny=0.0f, float nz=0.0f)
-	{
-		position(0) = x;
-		position(1) = y;
-		position(2) = z;
-		position(3) = 1.0f;
-		normal(0) = nx;
-		normal(1) = ny;
-		normal(2) = nz;
-		normal(3) = 1.0f;
-		color(0) = 1.0f;
-		color(1) = 1.0f;
-		color(2) = 1.0f;
-		texturecoords(0) = tu;
-		texturecoords(1) = tv;
 
+	VertexData():x(0), y(0), z(0), u(0), v(0), r(0), g(0), b(0), nx(0), ny(0), nz(0){
 	}
-	inline Vector4& GetPosition(){
-		return position;
-	}
-	inline const Vector4& GetPosition()const{
-		return position;
-	}
-	inline float GetX()const{
-		return position(0);
-	}
-	inline float GetY()const{
-		return position(1);
-	}
-	inline float GetZ()const{
-		return position(2);
-	}
-	inline Vector4& GetNormal(){
-		return normal;
-	}
-	inline const Vector4& GetNormal()const{
-		return normal;
-	}
-	inline float GetNormalX()const{
-		return normal(0);
-	}
-	inline float GetNormalY()const{
-		return normal(1);
-	}
-	inline float GetNormalZ()const{
-		return normal(2);
-	}
-	inline Vector3& GetColor(){
-		return color;
-	}
-	inline const Vector3& GetColor()const{
-		return color;
-	}
-	inline float GetColorR()const{
-		return color(0);
-	}
-	inline float GetColorG()const{
-		return color(1);
-	}
-	inline float GetColorB()const{
-		return color(2);
-	}
-	inline Vector2& GetTextureCoordinates(){
-		return texturecoords;
-	}
-	inline const Vector2& GetTextureCoordinates()const{
-		return texturecoords;
-	}
-	inline float GetTextureU()const{
-		return texturecoords(0);
-	}
-	inline float GetTextureV()const{
-		return texturecoords(1);
-	}
-	inline VertexData ToVertexData()const{
-		VertexData vd = {GetX(), GetY(), GetZ(), GetTextureU(), GetTextureV(), GetColorR(), GetColorG(), GetColorB(), GetNormalX(), GetNormalY(), GetNormalZ()};
-		return vd;
+	VertexData(float x, float y, float z, float u, float v,
+			float r, float g, float b,
+			float nx, float ny, float nz):
+			x(x), y(y), z(z), u(u), v(v), r(r), g(g), b(b), nx(nx), ny(ny), nz(nz){
 	}
 };
-
-class Triangle{
-private:
-	std::list<Vertex> vertices;
-public:
-	Triangle(){
-	}
-	const std::list<Vertex>& GetVertices()const{
-		return vertices;
-	}
-	void Clear(){
-		vertices.empty();
-	}
-	void AddVertex(const Vertex& vertex){
-		if(vertices.size()<3){
-			vertices.push_back(vertex);
-		}
-	}
-};
-
-class Geometry{
-private:
-	bool visible;
-public:
-	Geometry(bool visible = true):visible(visible){}
-	virtual ~Geometry(){
-
-	}
-	virtual void SetVisibility(bool visibility){
-		visible = visibility;
-	}
-	virtual bool IsVisible()const{
-		return visible;
-	}
-};
-
-class TriangleStrip: public Geometry{
-public:
-	typedef std::list<Vertex> Vertices;
-private:
-	std::list<Vertex> vertices;
-public:
-	TriangleStrip(bool visible = true):Geometry(visible){
-	}
-	const std::list<Vertex>& GetVertices()const{
-		return vertices;
-	}
-	void Clear(){
-		vertices.empty();
-	}
-	void AddVertex(const Vertex& vertex){
-		vertices.push_back(vertex);
-	}
-};
-
-class IRenderable:public Cloneable<IRenderable>{
-private:
-	bool visible;
-public:
-	IRenderable(bool visible=true):visible(visible){}
-	virtual ~IRenderable(){
-
-	}
-	virtual void SetVisibility(bool visibility){
-		visible = visibility;
-	}
-	virtual bool IsVisible()const{
-		return visible;
-	}
-
-	virtual void Render()const = 0;
-
-};
-
-class IRenderableFactory{
-public:
-	virtual boost::shared_ptr<IRenderable> CreateFromTriangleStrip(const TriangleStrip& trianglestrip) = 0;
-};
-
-namespace OpenGL{
 
 class Texture:public ITexture{
 private: GLuint texture;
@@ -308,6 +143,16 @@ public:
 			//glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 	}
+	void UpdateTextureCoords(const std::list<VertexData>& vertexData){
+		glBindBuffer(GL_ARRAY_BUFFER, vertexDataBuffer);
+		VertexData* data = (VertexData*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+		std::list<VertexData>::const_iterator itr = vertexData.begin();
+		for(unsigned int i=0; i<numvertices && itr != vertexData.end();i++, itr++){
+			data[i].u = itr->u;
+			data[i].v = itr->v;
+		}
+		glUnmapBuffer(GL_ARRAY_BUFFER);
+	}
 };
 
 
@@ -317,26 +162,97 @@ public:
 	boost::shared_ptr<IRenderable> CreateFromTriangleStrip(const TriangleStrip& trianglestrip){
 		const std::list<Vertex>& vertices = trianglestrip.GetVertices();
 
-
 		GLuint vertexDataSize = sizeof(VertexData)*vertices.size();
 		VertexData* vertexData = new VertexData[vertices.size()];
 
-
 		std::list<Vertex>::const_iterator itr = vertices.begin();
 		for(unsigned int i=0; itr!=vertices.end(); i++, itr++){
-			vertexData[i]=itr->ToVertexData();
+			vertexData[i]=VertexData(itr->GetX(), itr->GetY(), itr->GetZ(), itr->GetTextureU(), itr->GetTextureV(), itr->GetColorR(), itr->GetColorG(), itr->GetColorB(), itr->GetNormalX(), itr->GetNormalY(), itr->GetNormalZ());
 		}
-
-
 		GLuint vertexDataBuffer;
 		glGenBuffers(1, &vertexDataBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexDataBuffer);
 		glBufferData(GL_ARRAY_BUFFER, vertexDataSize, vertexData, GL_STATIC_DRAW);
 
-
 		boost::shared_ptr<VBO> vbo(new VBO(vertices.size(), vertexDataBuffer));
 		delete[] vertexData;
 		return vbo;
+	}
+};
+class VBOTextureAnimation:public IAnimation{
+private:
+	State state;
+	float elapsed;
+	std::map<float, std::vector<TextureAnimationKey> > keys;
+	bool loop;
+public:
+	VBOTextureAnimation(const TextureAnimation& textureanimation):state(Stopped), elapsed(0.0f), keys(textureanimation.GetTextureAnimationKeys()), loop(textureanimation.Loops()){}
+	virtual void Animate(SceneNode& scenenode, float tf, float dtf){
+		if(state == Playing){
+			elapsed+=dtf;
+			RenderableProperty& renderableproperty = scenenode.GetSceneNodeProperty<RenderableProperty>("renderable");
+			IRenderable& renderable = renderableproperty.GetRenderable();
+			VBO& vbo = dynamic_cast<VBO&>(renderable);
+			if(&vbo){
+				std::list<VertexData> vertexData;
+				//populate vertexData
+				//find key
+				//if has keys
+				std::map<float, std::vector<TextureAnimationKey> >::const_iterator key;
+				if(keys.size() > 0){
+					//if only one key, return that key
+					if(keys.size() == 1){
+						key = keys.begin();
+					}
+					//if before earliest time, return earliest key
+					else if(tf < keys.begin()->first){
+						key = keys.begin();
+					}
+					//if after latest time, return last key
+					else if(tf > (--keys.end())->first){
+						key = (--keys.end());
+					}else{
+						//else between two keys
+						std::map<float, std::vector<TextureAnimationKey> >::const_iterator itr = keys.begin();
+						//find key immediately before
+						for(;itr!=keys.end(); itr++){
+							if(itr->first > tf){
+								key = itr;
+								break;
+							}
+						}
+					}
+					for(std::vector<TextureAnimationKey>::const_iterator itr = key->second.begin(); itr != key->second.end(); itr++){
+						vertexData.push_back(VertexData(0,0,0, itr->GetTextureCoordinates()(0), itr->GetTextureCoordinates()(1), 0,0,0, 0,0,0));
+					}
+					vbo.UpdateTextureCoords(vertexData);
+				}
+			}
+		}
+	}
+	const std::string GetType()const{
+		return "vbotextureanimation";
+	}
+	virtual void Play(){
+		state = Playing;
+	}
+	virtual void Pause(){
+		state = Paused;
+	}
+	virtual void Stop(){
+		state = Stopped;
+		elapsed = 0.0f;
+	}
+};
+
+class VBOTextureAnimationFactory{
+private:
+	std::list<boost::shared_ptr<VBOTextureAnimation> > vbotextureanimations;
+public:
+	boost::shared_ptr<VBOTextureAnimation> CreateFromTextureAnimation(const TextureAnimation& textureanimation){
+		boost::shared_ptr<VBOTextureAnimation> vbotextureanimation(new VBOTextureAnimation(textureanimation));
+		vbotextureanimations.push_back(vbotextureanimation);
+		return vbotextureanimation;
 	}
 };
 #endif //defined(GL_VERSION_1_5)

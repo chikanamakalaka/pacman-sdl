@@ -394,6 +394,14 @@ const std::string* TiXmlElement::Attribute( const std::string& name, float* f ) 
 	return s;
 }
 
+const std::string* TiXmlElement::Attribute( const std::string& name, bool* b ) const {
+	const std::string* s = Attribute( name );
+		if ( s )
+			*b = *s=="True" || *s=="true" || *s=="Yes" || *s=="yes" || *s=="On" || *s=="on";
+		else
+			*b = false;
+		return s;
+}
 void TiXmlElement::SetAttribute( const std::string& name, int val )
 {	
 	char buf[64];
