@@ -288,6 +288,9 @@ public:
 	const Matrix4& GetPosition()const{
 		return position;
 	}
+	void SetPosition(const Matrix4& position){
+		this->position = position;
+	}
 };
 class IAnimation{
 public:
