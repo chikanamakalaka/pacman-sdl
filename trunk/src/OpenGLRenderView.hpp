@@ -23,6 +23,7 @@ private:
 	OpenGL::DisplayListFactory displaylistfactory;
 	OpenGL::VBOFactory vbofactory;
 	TextureFactory<OpenGL::Texture> texturefactory;
+	OpenGL::VBOTextureAnimationFactory vbotextureanimationfactory;
 public:
 	OpenGLRenderView(SignalBroker& signalbroker):
 		signalbroker(signalbroker),
@@ -157,6 +158,17 @@ protected:
 			//boost::shared_ptr<IRenderable> displaylist = displaylistfactory.CreateFromTriangleStrip(trianglestrip);
 			//scenenode.AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(displaylist, texture)));
 			}
+		}
+		if(scenenode.HasSceneNodeProperty("animations")){
+			AnimationsProperty& animationsproperty = scenenode.GetSceneNodeProperty<AnimationsProperty>("animations");
+			std::map<std::string, boost::shared_ptr<IAnimation> >::iterator itr = animationsproperty.GetAnimations().begin();
+			for(; itr != animationsproperty.GetAnimations().end(); itr++){
+				boost::shared_ptr<TextureAnimation> textureanimation = boost::dynamic_pointer_cast<TextureAnimation>(itr->second);
+				if(textureanimation){
+					animationsproperty.AddAnimation(itr->first,vbotextureanimationfactory.CreateFromTextureAnimation(*textureanimation));
+				}
+			}
+
 		}
 
 	}

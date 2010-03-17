@@ -484,18 +484,50 @@ private:
 			if(characters){
 				const TiXmlElement* character = characters->FirstChildElement();
 				while(character){
+					const std::string* id = character->Attribute("id");
+					SceneNode& characternode = root.CreateChildNode(id?*id:"");
+					const TiXmlElement* animations = character->FirstChildElement("animations");
+					if(animations)
+					{
+						std::map<std::string, boost::shared_ptr<IAnimation> > animationsmap;
+						const TiXmlElement* animation = animations->FirstChildElement("animaton");
+						while(animation){
+							std::map<float, std::vector<TextureAnimationKey> > textureanimationkeys;
+							const std::string* id = animation->Attribute("id");
+							bool loop = false;
+							animation->Attribute("loop", &loop);
+							const TiXmlElement* frame = animation->FirstChildElement("frame");
+							while(frame){
+								const std::string* spriteid = frame->Attribute("spriteid");
+								float time = 0.0f;
+								frame->Attribute("time", &time);
+								std::vector<TextureAnimationKey> textureanimationkey;
+								if(spriteid){
+									std::map<std::string, boost::shared_ptr<SceneNode> >::const_iterator itr = sprites.find(*spriteid);
+									if(itr != sprites.end()){
+										const GeometryProperty& geometryproperty = itr->second->GetSceneNodeProperty<GeometryProperty>("geometry");
+										const TriangleStrip* trianglestrip = dynamic_cast<const TriangleStrip*>(&(geometryproperty.GetGeometry()));
+										if(trianglestrip){
+											std::list<Vertex>::const_iterator itr = trianglestrip->GetVertices().begin();
+											for(;itr != trianglestrip->GetVertices().end(); itr++){
+												textureanimationkey.push_back(TextureAnimationKey(Vector2(itr->GetTextureU(), itr->GetTextureV())));
+											}
+										}
+									}
+								}
+								textureanimationkeys[time] = textureanimationkey;
+								frame = frame->NextSiblingElement("frame");
+							}
+							animationsmap[id?*id:""] = boost::shared_ptr<IAnimation>(new TextureAnimation(textureanimationkeys, loop));
+							animation = animation->NextSiblingElement("animation");
+						}
+						characternode.AddSceneNodeProperty("animations", boost::shared_ptr<AnimationsProperty>(new AnimationsProperty(animationsmap)));
+
+					}
 					if(character->Value()=="playercharacter"){
-						const TiXmlElement* animations = character->FirstChildElement("animations");
-						if(animations)
-						{
 
-						}
 					}else if(character->Value()=="nonplayercharacter"){
-						const TiXmlElement* animations = character->FirstChildElement("animations");
-						if(animations)
-						{
 
-						}
 					}
 
 					character = character->NextSiblingElement();

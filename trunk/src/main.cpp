@@ -34,9 +34,10 @@
 #include "OutputStreamView.hpp"
 #include "ClockView.hpp"
 #include "TimerView.hpp"
-#include "OpenGL/util.hpp"
 #include "PacmanDB.hpp"
 #include "SceneNodeProperties.hpp"
+#include "Animations.hpp"
+#include "OpenGL/util.hpp"
 #include "SceneGraphController.hpp"
 #include "GamestateController.hpp"
 #include "AnimationController.hpp"
@@ -99,6 +100,7 @@ int main(int argc, char *argv[]) try{
 	SceneGraphController scenegraphcontroller(signalbroker);
 	GamestateController gamestatecontroller(signalbroker);
 	OpenGLRenderView openglrenderview(signalbroker);
+	AnimationController animationcontroller(signalbroker);
 
 
 	//application specific
