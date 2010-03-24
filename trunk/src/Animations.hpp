@@ -34,124 +34,78 @@ public:
 		}
 	};
 private:
-	std::map<float, SplineKey> keys;
+  int degree;
+  std::set<float> knots;
+	std::vector<Vector3> controlpoints;
 public:
 	Spline(){}
+  Spline(int degree):degree(degree){}
 	virtual ~Spline(){}
-	void AddKey(float time, const SplineKey& key){
-		keys.insert(std::pair<float, SplineKey>(time, key));
+	void AddKnot(float knot){
+		knots.insert(knot);
 	}
-  //http://chi3x10.wordpress.com/2009/10/18/de-boor-algorithm-in-c/
-  SplineKey deBoor(float time, bool loop)const{
-    std::vector<float> knots;
-    std::vector<SplineKey> ctrlPoints;
-    return deBoor(time, keys.size(), WhichInterval(time, knots, ti), time, knots, ctrlPoints);
+  void AddControlPoint(const Vector3& controlpoint){
+    controlpoints.push_back(controlpoint);
   }
-  SplineKey deBoor(int k,int degree, int i, double x, double* knots, Point *ctrlPoints){
+  Vector3 Interpolate(float t, bool loop)const{
+    std::set<float> knots(this->knots);
+    float terminalknots = controlpoints.size()-knots.size()+degree;
+    if(knots.size()>0){
+      //duplicate knots at the beginning
+      for(int i =0; i<std::ceil(terminalknots/2); i++){
+        knots.insert(*knots.begin());
+      }
+      //duplicate knots at the end
+      for(int i =0; i<std::floor(terminalknots/2); i++){
+        knots.insert(*(--knots.end()));
+      }
+    }else{
+      //no existing knots, set all knots to 0.0
+      for(int i =0; i<terminalknots; i++){
+        knots.insert(0.0f);
+      }
+    }
+    //looping?
+    if(loop && t>*(--knots.end())){
+      t = std::fmod(t, *(--knots.end()));
+    }
+    return deBoor(t, knots, controlpoints);
+  }
+  //http://chi3x10.wordpress.com/2009/10/18/de-boor-algorithm-in-c/
+  Vector3 deBoor(float x, const std::set<float>& knots, const std::vector<Vector3>& controlpoints)const{
+    int i,k;
+    std::set<float>::const_iterator itr = knots.begin():
+    for(; itr != knots.end(); itr++){
+      if(itr+1 != knots.end()){
+        if(x>=*itr ** x<*(itr+1)){
+          i = std::static_cast<int>(*itr);
+      }
+    }
+    k = knots.size() - controlpoints.size();
+    return deBoor(time, knots, controlpoints, i, k-1, k);
+  }
+  Vector3 deBoor(float x, const std::set<float>& knots, const std::vector<Vector3>& controlpoints, i, j, k){
     // Please see wikipedia page for detail
     // note that the algorithm here kind of traverses in reverse order
     // comapred to that in the wikipedia page
-    if( k == 0)
+    if( j == 0)
       return ctrlPoints[i];
     else
     {
-      double alpha = (x-knots[i])/(knots[i+degree+1-k]-knots[i]);
-      return (deBoor(k-1,degree, i-1, x, knots, ctrlPoints)*(1-alpha )+deBoor(k-1,degree, i, x, knots, ctrlPoints)*alpha );
-    }
-  }
-  int WhichInterval(double x, double *knot, int ti){
-    for(int i=1;i<ti-1;i++)
-    {
-    if(x<knot[i])
-    return(i-1);
-    else if(x == knot[ti-1])
-    return(ti-1);
-    }
-    return -1;
-  }
-
-	SplineKey GetCurrentKey(float time, bool loop)const{
-		//if has keys
-		if(keys.size() > 0){
-			//if only one key, return that key
-			if(keys.size() == 1){
-				return keys.begin()->second;
-			}
-			//if before earliest time, return earliest key
-			else if(time < keys.begin()->first){
-				return keys.begin()->second;
-			}
-			//if after latest time, return last key
-			else if(time > (--keys.end())->first){
-				if(loop){
-					//if looped animation and elapsed is past the end, loop the elapsed around to the start
-					time = std::fmod(time, (--keys.end())->first);
-				}else{
-					return (--keys.end())->second;
-				}
-			}
-      else{
-        //else between two keys?
-        std::map<float, SplineKey>::const_iterator itr = keys.begin();
-        //perform linear interpolation between two keys
-        //find key immediately before and immediately after
-        std::map<float, SplineKey>::const_iterator p0;
-        std::map<float, SplineKey>::const_iterator p1;
-        for(;itr!=keys.end(); itr++){
-          if(itr->first > time){
-            p0 = itr;
-            p1 = (++itr);
-            break;
-          }
+      float k0, k1;
+      std::set<float>::const_iterator itr =  knots.begin();
+      for(int l = 0;itr != knots.end(); itr++, l++){
+        if(l == i){
+          k0 = *itr;
         }
-        if(keys.size()==2){
-          
-        }else{
-          //perform quadratic interpolation
-          std::map<float, SplineKey>::const_iterator p2 = p1;
-          p2++;
-          
-          if(p2 == keys.end()){
-            p2 = p1;
-            p1 = p0;
-          }
-          
+        if(l == i+k-j){
+          k1 = *itr;
         }
-        //slerp between orientations
-        float scaleQ, scaleR;
-        float t = (time-before->first) / (after->first - before->first);
-        boost::math::quaternion<float> q = before->second.GetOrientation();
-        boost::math::quaternion<float> r = after->second.GetOrientation();
-        float cos_theta = boost::math::norm(q);
-        float theta = acos(cos_theta);
-        float invsin = 1.0 / sin(theta);
-        float PIdiv2 = M_PI/2;
-
-        boost::math::quaternion<float> val;
-
-        if((1.0 + cos_theta > 0.001f)){
-          if((1.0-cos_theta )> 0.001f){
-            scaleQ = sin((1.0 - t)*theta)*invsin;
-            scaleR = sin(t*theta)*invsin;
-          }else{
-            scaleQ = 1.0 - t;
-            scaleR = t;
-          }
-          val = q*scaleQ + r* scaleR;
-        }else{
-          val = boost::math::quaternion<float>(r.R_component_1(), -r.R_component_1(), r.R_component_1(), -r.R_component_1());
-          scaleQ = sin((1.0 - t) * PIdiv2);
-          scaleR =sin(t * PIdiv2);
-          val*=scaleR;
-          q*=scaleQ;
-          val+=val;
-        }
-        val = boost::math::norm(val);
-        //interpolate between positions
-        return SplineKey(Vector3(), val);
       }
-		}
-	}
+      double alpha = (x-k0)/(k1-k0);
+      return (1 - alpha) * deBoor(x, knots, controlpoints, i-1, j-1, k)+ alpha * deBoor(x, knots, controlpoints, i, j-1, k);
+    }
+  }
 };
 
 class RotationAnimation:public IAnimation{
