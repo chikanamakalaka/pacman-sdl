@@ -38,7 +38,7 @@ private:
   std::set<float> knots;
 	std::vector<Vector3> controlpoints;
 public:
-	Spline(){}
+	Spline():degree(0){}
   Spline(int degree):degree(degree){}
 	virtual ~Spline(){}
 	void AddKnot(float knot){
@@ -48,32 +48,40 @@ public:
     controlpoints.push_back(controlpoint);
   }
   Vector3 Interpolate(float t, bool loop)const{
-    std::set<float> knots(this->knots);
-    float terminalknots = controlpoints.size()-knots.size()+degree;
-    if(knots.size()>0){
-      //duplicate knots at the beginning
-      for(int i =0; i<std::ceil(terminalknots/2); i++){
-        knots.insert(*knots.begin());
-      }
-      //duplicate knots at the end
-      for(int i =0; i<std::floor(terminalknots/2); i++){
-        knots.insert(*(--knots.end()));
-      }
-    }else{
-      //no existing knots, set all knots to 0.0
-      for(int i =0; i<terminalknots; i++){
-        knots.insert(0.0f);
-      }
-    }
     //looping?
     if(loop && t>*(--knots.end())){
       t = std::fmod(t, *(--knots.end()));
     }
-    return deBoor(t, knots, controlpoints);
+    //no degree set? set it
+    if(degree == 0){
+      degree = controlpoints.size() - 1;
+    }
+    
+    std::set<float> knots(this->knots);
+    //http://www.rhino3d.com/nurbs.htm
+    //The knots are a list of degree+N-1 numbers, where N is the number of control points. 
+    float terminalknotsneeded = knots.size()-(degree+controlpoints.size()-1);
+    if(knots.size()>0){
+      //duplicate knots at the beginning
+      for(int i =0; i<std::ceil(terminalknotsneeded/2); i++){
+        knots.insert(*knots.begin());
+      }
+      //duplicate knots at the end
+      for(int i =0; i<std::floor(terminalknotsneeded/2); i++){
+        knots.insert(*(--knots.end()));
+      }
+    }else{
+      //no existing knots, set all knots to 0.0
+      for(int i =0; i<terminalknotsneeded; i++){
+        knots.insert(0.0f);
+      }
+    }
+    
+    return deBoor(t, degree, knots, controlpoints);
   }
   //http://chi3x10.wordpress.com/2009/10/18/de-boor-algorithm-in-c/
-  Vector3 deBoor(float x, const std::set<float>& knots, const std::vector<Vector3>& controlpoints)const{
-    int i,k;
+  static Vector3 deBoor(float x, int degree, const std::set<float>& knots, const std::vector<Vector3>& controlpoints)const{
+    int i;
     std::set<float>::const_iterator itr = knots.begin():
     for(; itr != knots.end(); itr++){
       if(itr+1 != knots.end()){
@@ -81,14 +89,14 @@ public:
           i = std::static_cast<int>(*itr);
       }
     }
-    k = knots.size() - controlpoints.size();
-    return deBoor(time, knots, controlpoints, i, k-1, k);
+    return deBoor(time, degree, knots, controlpoints, i, degree, degree+1);
   }
-  Vector3 deBoor(float x, const std::set<float>& knots, const std::vector<Vector3>& controlpoints, i, j, k){
+  //i = closest knot
+  static Vector3 deBoor(float x, int degree, const std::set<float>& knots, const std::vector<Vector3>& controlpoints, i, order)const{
     // Please see wikipedia page for detail
     // note that the algorithm here kind of traverses in reverse order
     // comapred to that in the wikipedia page
-    if( j == 0)
+    if( degree == 0)
       return ctrlPoints[i];
     else
     {
@@ -98,12 +106,12 @@ public:
         if(l == i){
           k0 = *itr;
         }
-        if(l == i+k-j){
+        if(l == i+order-degree){
           k1 = *itr;
         }
       }
       double alpha = (x-k0)/(k1-k0);
-      return (1 - alpha) * deBoor(x, knots, controlpoints, i-1, j-1, k)+ alpha * deBoor(x, knots, controlpoints, i, j-1, k);
+      return (1 - alpha) * deBoor(x, degree-1, knots, controlpoints, i-1, order)+ alpha * deBoor(x, degree-1, knots, controlpoints, i, order);
     }
   }
 };
