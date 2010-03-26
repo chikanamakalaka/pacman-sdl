@@ -39,7 +39,7 @@ private:
 	std::vector<Vector3> controlpoints;
 public:
 	Spline():degree(0){}
-  Spline(int degree):degree(degree){}
+	Spline(int degree):degree(degree){}
 	virtual ~Spline(){}
 	void AddKnot(float knot){
 		knots.insert(knot);
@@ -53,6 +53,7 @@ public:
       t = std::fmod(t, *(--knots.end()));
     }
     //no degree set? set it
+    int degree = this->degree;
     if(degree == 0){
       degree = controlpoints.size() - 1;
     }
@@ -80,24 +81,27 @@ public:
     return deBoor(t, degree, knots, controlpoints);
   }
   //http://chi3x10.wordpress.com/2009/10/18/de-boor-algorithm-in-c/
-  static Vector3 deBoor(float x, int degree, const std::set<float>& knots, const std::vector<Vector3>& controlpoints)const{
+  static Vector3 deBoor(float x, int degree, const std::set<float>& knots, const std::vector<Vector3>& controlpoints){
     int i;
-    std::set<float>::const_iterator itr = knots.begin():
+	std::set<float>::const_iterator itr = knots.begin();
     for(; itr != knots.end(); itr++){
-      if(itr+1 != knots.end()){
-        if(x>=*itr ** x<*(itr+1)){
-          i = std::static_cast<int>(*itr);
-      }
-    }
-    return deBoor(time, degree, knots, controlpoints, i, degree, degree+1);
+    	std::set<float>::const_iterator itr1 = itr;
+    	itr1++;
+		if(itr1 != knots.end()){
+			if(x>=*itr && x<(*itr1)){
+				i = static_cast<int>(*itr);
+			}
+		}
+	}
+    return deBoor(x, degree, knots, controlpoints, i, degree+1);
   }
   //i = closest knot
-  static Vector3 deBoor(float x, int degree, const std::set<float>& knots, const std::vector<Vector3>& controlpoints, i, order)const{
+  static Vector3 deBoor(float x, int degree, const std::set<float>& knots, const std::vector<Vector3>& controlpoints, int i, int order){
     // Please see wikipedia page for detail
     // note that the algorithm here kind of traverses in reverse order
     // comapred to that in the wikipedia page
     if( degree == 0)
-      return ctrlPoints[i];
+      return controlpoints[i];
     else
     {
       float k0, k1;
@@ -111,7 +115,8 @@ public:
         }
       }
       double alpha = (x-k0)/(k1-k0);
-      return (1 - alpha) * deBoor(x, degree-1, knots, controlpoints, i-1, order)+ alpha * deBoor(x, degree-1, knots, controlpoints, i, order);
+      boost::numeric::ublas::vector<float> v = ((1.0 - alpha) * deBoor(x, degree-1, knots, controlpoints, i-1, order)) + (alpha * deBoor(x, degree-1, knots, controlpoints, i, order));
+      return Vector3(v);
     }
   }
 };
@@ -134,17 +139,19 @@ public:
 class SplineAnimation:public IAnimation{
 private:
 	const Spline spline;
+	const Spline orientationspline;
 	State state;
 	float elapsed;
 	bool loop;
 public:
-	SplineAnimation(const Spline& spline, bool loop):spline(spline), state(Paused), elapsed(0.0f), loop(loop){}
+	SplineAnimation(const Spline& spline, const Spline& orientationspline, bool loop):spline(spline), orientationspline(orientationspline), state(Paused), elapsed(0.0f), loop(loop){}
 	virtual void Animate(SceneNode& scenenode, float tf, float dtf){
 		if(state == Playing){
 			elapsed+=dtf;
-			Spline::SplineKey splinekey = spline.GetCurrentKey(elapsed, loop);
+			Vector3 position = spline.Interpolate(elapsed, loop);
+			Vector3 orientation = orientationspline.Interpolate(elapsed, loop);
 			PositionProperty& positionproperty = scenenode.GetSceneNodeProperty<PositionProperty>("position");
-			positionproperty.SetPosition(splinekey.GetMatrix4());
+			//positionproperty.SetPosition(splinekey.GetMatrix4());
 		}
 	}
 	const std::string GetType()const{
