@@ -92,6 +92,9 @@ protected:
 			}
 		}
 	}
+	SignalBroker& GetSignalBroker(){
+		return signalbroker;
+	}
 };
 
 #endif /* SIGNALSUBSCRIBER_HPP_ */

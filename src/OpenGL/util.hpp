@@ -172,7 +172,7 @@ public:
 		GLuint vertexDataBuffer;
 		glGenBuffers(1, &vertexDataBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexDataBuffer);
-		glBufferData(GL_ARRAY_BUFFER, vertexDataSize, vertexData, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, vertexDataSize, vertexData, GL_DYNAMIC_DRAW);
 
 		boost::shared_ptr<VBO> vbo(new VBO(vertices.size(), vertexDataBuffer));
 		delete[] vertexData;
@@ -184,9 +184,15 @@ private:
 	State state;
 	float elapsed;
 	std::map<float, std::vector<TextureAnimationKey> > keys;
+	std::string name;
 	bool loop;
 public:
-	VBOTextureAnimation(const TextureAnimation& textureanimation):state(Stopped), elapsed(0.0f), keys(textureanimation.GetTextureAnimationKeys()), loop(textureanimation.Loops()){}
+	VBOTextureAnimation(const TextureAnimation& textureanimation):
+		state(textureanimation.GetState()),
+		elapsed(0.0f),
+		keys(textureanimation.GetTextureAnimationKeys()),
+		name(textureanimation.GetName()),
+		loop(textureanimation.Loops()){}
 	virtual void Animate(SceneNode& scenenode, float tf, float dtf){
 		if(state == Playing){
 			elapsed+=dtf;
@@ -199,7 +205,13 @@ public:
 				//find key
 				//if has keys
 				std::map<float, std::vector<TextureAnimationKey> >::const_iterator key;
+				std::map<float, std::vector<TextureAnimationKey> >::const_iterator last = keys.end();
 				if(keys.size() > 0){
+					last--;
+					if(tf > last->first && loop){
+						//if looped animation and elapsed is past the end, loop the elapsed around to the start
+						elapsed = std::fmod(elapsed, last->first);
+					}
 					//if only one key, return that key
 					if(keys.size() == 1){
 						key = keys.begin();
@@ -208,28 +220,22 @@ public:
 					else if(elapsed < keys.begin()->first){
 						key = keys.begin();
 					}
-					//if after latest time, return last key
-					else if(tf > (--keys.end())->first){
-						if(loop){
-							//if looped animation and elapsed is past the end, loop the elapsed around to the start
-							elapsed = std::fmod(elapsed, (--keys.end())->first);
-							//see if elapsed is now before animation
-							if(elapsed < keys.begin()->first){
-								key = keys.begin();
-							}
-						}else{
-							key = (--keys.end());
-						}
+					//if after latest time, return last key or loop
+					else if(elapsed > last->first){
+						key = last;
 					}else{
 						//else between two keys
 						std::map<float, std::vector<TextureAnimationKey> >::const_iterator itr = keys.begin();
 						//find key immediately before
 						for(;itr!=keys.end(); itr++){
-							if(itr->first > tf){
+							if(itr->first > elapsed){
 								key = itr;
 								break;
 							}
 						}
+					}
+					if(key==keys.end()){
+						key = last;
 					}
 					for(std::vector<TextureAnimationKey>::const_iterator itr = key->second.begin(); itr != key->second.end(); itr++){
 						vertexData.push_back(VertexData(0,0,0, itr->GetTextureCoordinates()(0), itr->GetTextureCoordinates()(1), 0,0,0, 0,0,0));
@@ -240,7 +246,13 @@ public:
 		}
 	}
 	const std::string GetType()const{
-		return "vbotextureanimation";
+		return "textureanimation";
+	}
+	const std::string& GetName()const{
+		return name;
+	}
+	State GetState()const{
+		return state;
 	}
 	virtual void Play(){
 		state = Playing;

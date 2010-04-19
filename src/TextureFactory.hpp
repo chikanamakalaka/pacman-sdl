@@ -58,7 +58,9 @@ public:
 		SDL_Surface *surface;
 
 		if((surface = IMG_Load(filepath.c_str()))){
-			return LoadFromSDLSurface(surface);
+			boost::shared_ptr<T> t(LoadFromSDLSurface(surface));
+			SDL_FreeSurface(surface);
+			return t;
 		}else{
 			throw UnableToCreateSurface(filepath.c_str());
 		}

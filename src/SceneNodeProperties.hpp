@@ -299,6 +299,8 @@ public:
 
 	}
 	virtual const std::string GetType()const = 0;
+	virtual State GetState()const=0;
+	virtual const std::string& GetName()const = 0;
 	virtual void Animate(SceneNode& scenenode, float tf, float dtf) = 0;
 	virtual void Play() = 0;
 	virtual void Pause() = 0;
@@ -328,9 +330,14 @@ public:
 	const std::map<std::string, boost::shared_ptr<IAnimation> >& GetAnimations()const{
 		return animations;
 	}
-	void AddAnimation(const std::string& name, boost::shared_ptr<IAnimation> animation){
+	void AddAnimation(boost::shared_ptr<IAnimation> animation){
 		///animations.insert(std::map<std::string, boost::shared_ptr<IAnimation> >::value_type(name, animation));
-		animations[name]=animation;
+		animations[animation->GetName()]=animation;
+
+		//if replacing an animation,
+		if(selectedanimations.find(animation->GetType()) != selectedanimations.end() && selectedanimations.find(animation->GetType())->second->GetName() == animation->GetName()){
+			selectedanimations[animation->GetType()] = animation;
+		}
 	}
 	void SelectAnimation(const std::string& name){
 		std::map<std::string, boost::shared_ptr<IAnimation> >::iterator itr = animations.find(name);
@@ -343,6 +350,9 @@ public:
 	}*/
 	const std::map<std::string, boost::shared_ptr<IAnimation> >& GetSelectedAnimations()const{
 		return selectedanimations;
+	}
+	boost::shared_ptr<IAnimation> GetAnimationByName(const std::string& name){
+		return animations.find(name)->second;
 	}
 };
 

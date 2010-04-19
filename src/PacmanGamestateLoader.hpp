@@ -131,7 +131,9 @@ private:
 		TerminatedState(my_context ctx):
 			my_base(ctx){
 			//outermost_context().GetSignalBroker().InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Quit");
-			std::exit(0);
+			//std::exit(0);
+			outermost_context().GetSignalBroker().InvokeSignal
+				<ClockView::StopClock>(	"/clock/stop");
 		}
 	};
 	PacmanStateMachine Pacmanstatemachine;
@@ -246,15 +248,416 @@ public:
 		EvQuit evquit;
 		Pacmanstatemachine.process_event(evquit);
 		if(Pacmanstatemachine.terminated()){
-			exit(0);
+			signalbroker.InvokeSignal<ClockView::StopClock>("/clock/stop");
 		}
 
 	}
 	void LoadGamestates(){
 
 		{
-			/*SceneGraph& scenegraph = */scenegraphcontroller->CreateSceneGraph("MainMenu");
+			boost::shared_ptr<SceneGraph> scenegraph = scenegraphcontroller->CreateSceneGraph("MainMenu");
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created scenegraph: MainMenu");
+			SceneNode& root = scenegraph->GetRoot();
+
+			float filewidth = 640.0f;
+			float fileheight = 480.0f;
+			boost::shared_ptr<SceneNodeProperty> spritesheettexture(new TextureProperty(FileSystem::MakeUsrLocalPath("/images/spritesheet.png")));
+
+			//blinking ghost animation keys
+			std::map<float, std::vector<TextureAnimationKey> > blinktextureanimationkeys;
+			std::vector<TextureAnimationKey> textureanimationkey0;
+			textureanimationkey0.push_back(Vector2(64.0f/filewidth, 240.0f/fileheight));
+			textureanimationkey0.push_back(Vector2(96.0f/filewidth, 240.0f/fileheight));
+			textureanimationkey0.push_back(Vector2(64.0f/filewidth, 288.0f/fileheight));
+			textureanimationkey0.push_back(Vector2(96.0f/filewidth, 288.0f/fileheight));
+
+			std::vector<TextureAnimationKey> textureanimationkey1;
+			textureanimationkey1.push_back(Vector2(96.0f/filewidth, 240.0f/fileheight));
+			textureanimationkey1.push_back(Vector2(128.0f/filewidth, 240.0f/fileheight));
+			textureanimationkey1.push_back(Vector2(96.0f/filewidth, 288.0f/fileheight));
+			textureanimationkey1.push_back(Vector2(128.0f/filewidth, 288.0f/fileheight));
+
+			std::vector<TextureAnimationKey> textureanimationkey2;
+			textureanimationkey2.push_back(Vector2(128.0f/filewidth, 240.0f/fileheight));
+			textureanimationkey2.push_back(Vector2(160.0f/filewidth, 240.0f/fileheight));
+			textureanimationkey2.push_back(Vector2(128.0f/filewidth, 288.0f/fileheight));
+			textureanimationkey2.push_back(Vector2(160.0f/filewidth, 288.0f/fileheight));
+
+			std::vector<TextureAnimationKey> textureanimationkey3;
+			textureanimationkey3.push_back(Vector2(160.0f/filewidth, 240.0f/fileheight));
+			textureanimationkey3.push_back(Vector2(192.0f/filewidth, 240.0f/fileheight));
+			textureanimationkey3.push_back(Vector2(160.0f/filewidth, 288.0f/fileheight));
+			textureanimationkey3.push_back(Vector2(192.0f/filewidth, 288.0f/fileheight));
+
+			blinktextureanimationkeys[0.0f]=textureanimationkey0;
+			blinktextureanimationkeys[0.3f]=textureanimationkey1;
+			blinktextureanimationkeys[0.6f]=textureanimationkey0;
+			blinktextureanimationkeys[0.9f]=textureanimationkey1;
+			blinktextureanimationkeys[1.2f]=textureanimationkey2;
+			blinktextureanimationkeys[1.5f]=textureanimationkey3;
+			blinktextureanimationkeys[1.8f]=textureanimationkey2;
+			blinktextureanimationkeys[2.1f]=textureanimationkey3;
+			blinktextureanimationkeys[2.4f]=textureanimationkey0;
+
+			//pill
+			{
+				int width = 16;
+				int height = 16;
+				float u0 = 16.0f;
+				float u1 = 32.0f;
+				float v0 = 32.0f;
+				float v1 = 48.0f;
+
+				SceneNode::SceneNodePtr pillnode = root.CreateChildNodePtr("pill");
+				boost::shared_ptr<PositionProperty> positionproperty(new PositionProperty());
+				pillnode->AddSceneNodeProperty("position", positionproperty);
+
+				Matrix4& position = positionproperty->GetPosition();
+				position(0,3)=20;
+				position(1,3)=170;
+
+				boost::shared_ptr<TriangleStrip> sprite(new TriangleStrip(true));
+				//create sprite geometry
+				sprite->AddVertex(Vertex(0,0,1, u0/filewidth,v0/fileheight));
+				sprite->AddVertex(Vertex(width,0,1, u1/filewidth,v0/fileheight));
+				sprite->AddVertex(Vertex(0,height,1, u0/filewidth,v1/fileheight));
+				sprite->AddVertex(Vertex(width,height,1, u1/filewidth,v1/fileheight));
+
+				pillnode->AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(sprite)));
+				pillnode->AddSceneNodeProperty("texture", spritesheettexture);
+			}
+			//pacman
+			{
+				int width = 48;
+				int height = 64;
+				float u0 = 192.0f;
+				float u1 = 224.0f;
+				float v0 = 48.0f;
+				float v1 = 96.0f;
+
+				SceneNode::SceneNodePtr pacmannode = root.CreateChildNodePtr("pacman");
+				pacmannode->AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
+
+
+				boost::shared_ptr<TriangleStrip> sprite(new TriangleStrip(true));
+				//create sprite geometry
+				sprite->AddVertex(Vertex(0,0,1, u0/filewidth,v0/fileheight));
+				sprite->AddVertex(Vertex(width,0,1, u1/filewidth,v0/fileheight));
+				sprite->AddVertex(Vertex(0,height,1, u0/filewidth,v1/fileheight));
+				sprite->AddVertex(Vertex(width,height,1, u1/filewidth,v1/fileheight));
+
+				pacmannode->AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(sprite)));
+				pacmannode->AddSceneNodeProperty("texture", spritesheettexture);
+				std::map<float, std::vector<TextureAnimationKey> > textureanimationkeys;
+
+				//TODO:Pacman coordinates
+				std::vector<TextureAnimationKey> textureanimationkey0;
+				textureanimationkey0.push_back(Vector2(192.0f/filewidth, 48.0f/fileheight));
+				textureanimationkey0.push_back(Vector2(224.0f/filewidth, 48.0f/fileheight));
+				textureanimationkey0.push_back(Vector2(192.0f/filewidth, 96.0f/fileheight));
+				textureanimationkey0.push_back(Vector2(224.0f/filewidth, 96.0f/fileheight));
+				textureanimationkeys[0.0f]=textureanimationkey0;
+
+				std::vector<TextureAnimationKey> textureanimationkey1;
+				textureanimationkey1.push_back(Vector2(224.0f/filewidth, 48.0f/fileheight));
+				textureanimationkey1.push_back(Vector2(256.0f/filewidth, 48.0f/fileheight));
+				textureanimationkey1.push_back(Vector2(224.0f/filewidth, 96.0f/fileheight));
+				textureanimationkey1.push_back(Vector2(256.0f/filewidth, 96.0f/fileheight));
+				textureanimationkeys[0.3f]=textureanimationkey1;
+
+				textureanimationkeys[0.6f]=textureanimationkey0;
+
+				std::map<std::string, boost::shared_ptr<IAnimation> > animationsmap;
+				animationsmap["walkleft"] = boost::shared_ptr<IAnimation>(new TextureAnimation(textureanimationkeys, "walkleft", true));
+				animationsmap["walkleft"]->Play();
+
+				Spline spline(2);
+				spline.AddControlPoint(Vector3(20.0f, 150.0f, 0.0f));
+				spline.AddControlPoint(Vector3(700.0f, 150.0f, 0.0f));
+				spline.AddControlPoint(Vector3(700.0f, 150.0f, 0.0f));
+				spline.AddControlPoint(Vector3(20.0f, 150.0f, 0.0f));
+				spline.AddKnot(0.0f);
+				spline.AddKnot(0.0f);
+				spline.AddKnot(0.0f);
+				spline.AddKnot(5.0f);
+				spline.AddKnot(10.0f);
+				spline.AddKnot(10.0f);
+				spline.AddKnot(10.0f);
+				animationsmap["chase"] = boost::shared_ptr<IAnimation>(new SplineAnimation(spline, "chase", true));
+				animationsmap["chase"]->Play();
+				boost::shared_ptr<AnimationsProperty> animationsproperty(new AnimationsProperty(animationsmap));
+				animationsproperty->SelectAnimation("walkleft");
+				animationsproperty->SelectAnimation("chase");
+				pacmannode->AddSceneNodeProperty("animations", animationsproperty);
+			}
+			//blinky
+			{
+				int width = 48;
+				int height = 64;
+				float u0 = 192.0f;
+				float u1 = 224.0f;
+				float v0 = 48.0f;
+				float v1 = 96.0f;
+
+				SceneNode::SceneNodePtr blinkynode = root.CreateChildNodePtr("blinky");
+				blinkynode->AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
+
+
+				boost::shared_ptr<TriangleStrip> sprite(new TriangleStrip(true));
+				//create sprite geometry
+				sprite->AddVertex(Vertex(0,0,1, u0/filewidth,v0/fileheight));
+				sprite->AddVertex(Vertex(width,0,1, u1/filewidth,v0/fileheight));
+				sprite->AddVertex(Vertex(0,height,1, u0/filewidth,v1/fileheight));
+				sprite->AddVertex(Vertex(width,height,1, u1/filewidth,v1/fileheight));
+
+				blinkynode->AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(sprite)));
+				blinkynode->AddSceneNodeProperty("texture", spritesheettexture);
+				std::map<float, std::vector<TextureAnimationKey> > textureanimationkeys;
+
+				std::vector<TextureAnimationKey> textureanimationkey0;
+				textureanimationkey0.push_back(Vector2(192.0f/filewidth, 48.0f/fileheight));
+				textureanimationkey0.push_back(Vector2(224.0f/filewidth, 48.0f/fileheight));
+				textureanimationkey0.push_back(Vector2(192.0f/filewidth, 96.0f/fileheight));
+				textureanimationkey0.push_back(Vector2(224.0f/filewidth, 96.0f/fileheight));
+				textureanimationkeys[0.0f]=textureanimationkey0;
+
+				std::vector<TextureAnimationKey> textureanimationkey1;
+				textureanimationkey1.push_back(Vector2(224.0f/filewidth, 48.0f/fileheight));
+				textureanimationkey1.push_back(Vector2(256.0f/filewidth, 48.0f/fileheight));
+				textureanimationkey1.push_back(Vector2(224.0f/filewidth, 96.0f/fileheight));
+				textureanimationkey1.push_back(Vector2(256.0f/filewidth, 96.0f/fileheight));
+				textureanimationkeys[0.3f]=textureanimationkey1;
+
+				textureanimationkeys[0.6f]=textureanimationkey0;
+
+				std::map<std::string, boost::shared_ptr<IAnimation> > animationsmap;
+				animationsmap["walkleft"] = boost::shared_ptr<IAnimation>(new TextureAnimation(textureanimationkeys, "walkleft", true));
+				animationsmap["walkleft"]->Play();
+
+				animationsmap["blink"] = boost::shared_ptr<IAnimation>(new TextureAnimation(blinktextureanimationkeys, "blink", true));
+				animationsmap["blink"]->Play();
+
+				Spline spline(2);
+				spline.AddControlPoint(Vector3(100.0f, 150.0f, 0.0f));
+				spline.AddControlPoint(Vector3(800.0f, 150.0f, 0.0f));
+				spline.AddControlPoint(Vector3(800.0f, 150.0f, 0.0f));
+				spline.AddControlPoint(Vector3(100.0f, 150.0f, 0.0f));
+				spline.AddKnot(0.0f);
+				spline.AddKnot(0.0f);
+				spline.AddKnot(0.0f);
+				spline.AddKnot(5.0f);
+				spline.AddKnot(10.0f);
+				spline.AddKnot(10.0f);
+				spline.AddKnot(10.0f);
+				animationsmap["chase"] = boost::shared_ptr<IAnimation>(new SplineAnimation(spline, "chase", true));
+				animationsmap["chase"]->Play();
+				boost::shared_ptr<AnimationsProperty> animationsproperty(new AnimationsProperty(animationsmap));
+				animationsproperty->SelectAnimation("walkleft");
+				animationsproperty->SelectAnimation("chase");
+				blinkynode->AddSceneNodeProperty("animations", animationsproperty);
+			}
+			//pinky
+			{
+				int width = 48;
+				int height = 64;
+				float u0 = 192.0f;
+				float u1 = 224.0f;
+				float v0 = 96.0f;
+				float v1 = 144.0f;
+
+				SceneNode::SceneNodePtr pinkynode = root.CreateChildNodePtr("pinky");
+				pinkynode->AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
+
+
+				boost::shared_ptr<TriangleStrip> sprite(new TriangleStrip(true));
+				//create sprite geometry
+				sprite->AddVertex(Vertex(0,0,1, u0/filewidth,v0/fileheight));
+				sprite->AddVertex(Vertex(width,0,1, u1/filewidth,v0/fileheight));
+				sprite->AddVertex(Vertex(0,height,1, u0/filewidth,v1/fileheight));
+				sprite->AddVertex(Vertex(width,height,1, u1/filewidth,v1/fileheight));
+
+				pinkynode->AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(sprite)));
+				pinkynode->AddSceneNodeProperty("texture", spritesheettexture);
+				std::map<float, std::vector<TextureAnimationKey> > textureanimationkeys;
+
+				std::vector<TextureAnimationKey> textureanimationkey0;
+				textureanimationkey0.push_back(Vector2(192.0f/filewidth, 96.0f/fileheight));
+				textureanimationkey0.push_back(Vector2(224.0f/filewidth, 96.0f/fileheight));
+				textureanimationkey0.push_back(Vector2(192.0f/filewidth, 144.0f/fileheight));
+				textureanimationkey0.push_back(Vector2(224.0f/filewidth, 144.0f/fileheight));
+				textureanimationkeys[0.0f]=textureanimationkey0;
+
+				std::vector<TextureAnimationKey> textureanimationkey1;
+				textureanimationkey1.push_back(Vector2(224.0f/filewidth, 96.0f/fileheight));
+				textureanimationkey1.push_back(Vector2(256.0f/filewidth, 96.0f/fileheight));
+				textureanimationkey1.push_back(Vector2(224.0f/filewidth, 144.0f/fileheight));
+				textureanimationkey1.push_back(Vector2(256.0f/filewidth, 144.0f/fileheight));
+				textureanimationkeys[0.3f]=textureanimationkey1;
+
+				textureanimationkeys[0.6f]=textureanimationkey0;
+
+				std::map<std::string, boost::shared_ptr<IAnimation> > animationsmap;
+				animationsmap["walkleft"] = boost::shared_ptr<IAnimation>(new TextureAnimation(textureanimationkeys, "walkleft", true));
+				animationsmap["walkleft"]->Play();
+
+				animationsmap["blink"] = boost::shared_ptr<IAnimation>(new TextureAnimation(blinktextureanimationkeys, "blink", true));
+				animationsmap["blink"]->Play();
+
+				Spline spline(2);
+				spline.AddControlPoint(Vector3(150.0f, 150.0f, 0.0f));
+				spline.AddControlPoint(Vector3(850.0f, 150.0f, 0.0f));
+				spline.AddControlPoint(Vector3(850.0f, 150.0f, 0.0f));
+				spline.AddControlPoint(Vector3(150.0f, 150.0f, 0.0f));
+				spline.AddKnot(0.0f);
+				spline.AddKnot(0.0f);
+				spline.AddKnot(0.0f);
+				spline.AddKnot(5.0f);
+				spline.AddKnot(10.0f);
+				spline.AddKnot(10.0f);
+				spline.AddKnot(10.0f);
+				animationsmap["chase"] = boost::shared_ptr<IAnimation>(new SplineAnimation(spline, "chase", true));
+				animationsmap["chase"]->Play();
+				boost::shared_ptr<AnimationsProperty> animationsproperty(new AnimationsProperty(animationsmap));
+				animationsproperty->SelectAnimation("walkleft");
+				animationsproperty->SelectAnimation("chase");
+				pinkynode->AddSceneNodeProperty("animations", animationsproperty);
+			}
+
+			//inky
+			{
+				int width = 48;
+				int height = 64;
+				float u0 = 192.0f;
+				float u1 = 224.0f;
+				float v0 = 192.0f;
+				float v1 = 240.0f;
+
+				SceneNode::SceneNodePtr inkynode = root.CreateChildNodePtr("inky");
+				inkynode->AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
+
+
+				boost::shared_ptr<TriangleStrip> sprite(new TriangleStrip(true));
+				//create sprite geometry
+				sprite->AddVertex(Vertex(0,0,1, u0/filewidth,v0/fileheight));
+				sprite->AddVertex(Vertex(width,0,1, u1/filewidth,v0/fileheight));
+				sprite->AddVertex(Vertex(0,height,1, u0/filewidth,v1/fileheight));
+				sprite->AddVertex(Vertex(width,height,1, u1/filewidth,v1/fileheight));
+
+				inkynode->AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(sprite)));
+				inkynode->AddSceneNodeProperty("texture", spritesheettexture);
+				std::map<float, std::vector<TextureAnimationKey> > textureanimationkeys;
+
+				std::vector<TextureAnimationKey> textureanimationkey0;
+				textureanimationkey0.push_back(Vector2(192.0f/filewidth, 192.0f/fileheight));
+				textureanimationkey0.push_back(Vector2(224.0f/filewidth, 192.0f/fileheight));
+				textureanimationkey0.push_back(Vector2(192.0f/filewidth, 240.0f/fileheight));
+				textureanimationkey0.push_back(Vector2(224.0f/filewidth, 240.0f/fileheight));
+				textureanimationkeys[0.0f]=textureanimationkey0;
+
+				std::vector<TextureAnimationKey> textureanimationkey1;
+				textureanimationkey1.push_back(Vector2(224.0f/filewidth, 192.0f/fileheight));
+				textureanimationkey1.push_back(Vector2(256.0f/filewidth, 192.0f/fileheight));
+				textureanimationkey1.push_back(Vector2(224.0f/filewidth, 240.0f/fileheight));
+				textureanimationkey1.push_back(Vector2(256.0f/filewidth, 240.0f/fileheight));
+				textureanimationkeys[0.3f]=textureanimationkey1;
+
+				textureanimationkeys[0.6f]=textureanimationkey0;
+
+				std::map<std::string, boost::shared_ptr<IAnimation> > animationsmap;
+				animationsmap["walkleft"] = boost::shared_ptr<IAnimation>(new TextureAnimation(textureanimationkeys, "walkleft", true));
+				animationsmap["walkleft"]->Play();
+
+				animationsmap["blink"] = boost::shared_ptr<IAnimation>(new TextureAnimation(blinktextureanimationkeys, "blink", true));
+				animationsmap["blink"]->Play();
+
+				Spline spline(2);
+				spline.AddControlPoint(Vector3(250.0f, 150.0f, 0.0f));
+				spline.AddControlPoint(Vector3(950.0f, 150.0f, 0.0f));
+				spline.AddControlPoint(Vector3(950.0f, 150.0f, 0.0f));
+				spline.AddControlPoint(Vector3(250.0f, 150.0f, 0.0f));
+				spline.AddKnot(0.0f);
+				spline.AddKnot(0.0f);
+				spline.AddKnot(0.0f);
+				spline.AddKnot(5.0f);
+				spline.AddKnot(10.0f);
+				spline.AddKnot(10.0f);
+				spline.AddKnot(10.0f);
+				animationsmap["chase"] = boost::shared_ptr<IAnimation>(new SplineAnimation(spline, "chase", true));
+				animationsmap["chase"]->Play();
+				boost::shared_ptr<AnimationsProperty> animationsproperty(new AnimationsProperty(animationsmap));
+				animationsproperty->SelectAnimation("walkleft");
+				//animationsproperty->SelectAnimation("blink");
+				animationsproperty->SelectAnimation("chase");
+				inkynode->AddSceneNodeProperty("animations", animationsproperty);
+			}
+
+			//clyde
+			{
+				int width = 48;
+				int height = 64;
+				float u0 = 192.0f;
+				float u1 = 224.0f;
+				float v0 = 144.0f;
+				float v1 = 192.0f;
+
+				SceneNode::SceneNodePtr clydenode = root.CreateChildNodePtr("clyde");
+				clydenode->AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
+
+
+				boost::shared_ptr<TriangleStrip> sprite(new TriangleStrip(true));
+				//create sprite geometry
+				sprite->AddVertex(Vertex(0,0,1, u0/filewidth,v0/fileheight));
+				sprite->AddVertex(Vertex(width,0,1, u1/filewidth,v0/fileheight));
+				sprite->AddVertex(Vertex(0,height,1, u0/filewidth,v1/fileheight));
+				sprite->AddVertex(Vertex(width,height,1, u1/filewidth,v1/fileheight));
+
+				clydenode->AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(sprite)));
+				clydenode->AddSceneNodeProperty("texture", spritesheettexture);
+				std::map<float, std::vector<TextureAnimationKey> > textureanimationkeys;
+
+				std::vector<TextureAnimationKey> textureanimationkey0;
+				textureanimationkey0.push_back(Vector2(192.0f/filewidth, 144.0f/fileheight));
+				textureanimationkey0.push_back(Vector2(224.0f/filewidth, 144.0f/fileheight));
+				textureanimationkey0.push_back(Vector2(192.0f/filewidth, 192.0f/fileheight));
+				textureanimationkey0.push_back(Vector2(224.0f/filewidth, 192.0f/fileheight));
+				textureanimationkeys[0.0f]=textureanimationkey0;
+
+				std::vector<TextureAnimationKey> textureanimationkey1;
+				textureanimationkey1.push_back(Vector2(224.0f/filewidth, 144.0f/fileheight));
+				textureanimationkey1.push_back(Vector2(256.0f/filewidth, 144.0f/fileheight));
+				textureanimationkey1.push_back(Vector2(224.0f/filewidth, 192.0f/fileheight));
+				textureanimationkey1.push_back(Vector2(256.0f/filewidth, 192.0f/fileheight));
+				textureanimationkeys[0.3f]=textureanimationkey1;
+
+				textureanimationkeys[0.6f]=textureanimationkey0;
+
+				std::map<std::string, boost::shared_ptr<IAnimation> > animationsmap;
+				animationsmap["walkleft"] = boost::shared_ptr<IAnimation>(new TextureAnimation(textureanimationkeys, "walkleft", true));
+				animationsmap["walkleft"]->Play();
+
+				animationsmap["blink"] = boost::shared_ptr<IAnimation>(new TextureAnimation(blinktextureanimationkeys, "blink", true));
+				animationsmap["blink"]->Play();
+
+				Spline spline(2);
+				spline.AddControlPoint(Vector3(200.0f, 150.0f, 0.0f));
+				spline.AddControlPoint(Vector3(900.0f, 150.0f, 0.0f));
+				spline.AddControlPoint(Vector3(900.0f, 150.0f, 0.0f));
+				spline.AddControlPoint(Vector3(200.0f, 150.0f, 0.0f));
+				spline.AddKnot(0.0f);
+				spline.AddKnot(0.0f);
+				spline.AddKnot(0.0f);
+				spline.AddKnot(5.0f);
+				spline.AddKnot(10.0f);
+				spline.AddKnot(10.0f);
+				spline.AddKnot(10.0f);
+				animationsmap["chase"] = boost::shared_ptr<IAnimation>(new SplineAnimation(spline, "chase", true));
+				animationsmap["chase"]->Play();
+				boost::shared_ptr<AnimationsProperty> animationsproperty(new AnimationsProperty(animationsmap));
+				animationsproperty->SelectAnimation("walkleft");
+				animationsproperty->SelectAnimation("chase");
+				clydenode->AddSceneNodeProperty("animations", animationsproperty);
+			}
+
 		}
 		{
 
@@ -518,7 +921,7 @@ private:
 								textureanimationkeys[time] = textureanimationkey;
 								frame = frame->NextSiblingElement("frame");
 							}
-							animationsmap[id?*id:""] = boost::shared_ptr<IAnimation>(new TextureAnimation(textureanimationkeys, loop));
+							animationsmap[id?*id:""] = boost::shared_ptr<IAnimation>(new TextureAnimation(textureanimationkeys, id?*id:"", loop));
 							animation = animation->NextSiblingElement("animation");
 						}
 						characternode.AddSceneNodeProperty("animations", boost::shared_ptr<AnimationsProperty>(new AnimationsProperty(animationsmap)));

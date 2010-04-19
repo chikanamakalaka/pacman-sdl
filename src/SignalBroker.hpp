@@ -106,6 +106,11 @@ public:
 		CreateSignal<BlockHandler>(blockstr);
 		CreateSignal<UnblockHandler>(unblockstr);
 	}
+	virtual ~SignalBroker(){
+		for(Signals::iterator itr = signals.begin(); itr!=signals.end(); itr++){
+			delete itr->second;
+		}
+	}
 	template<typename Sig_Tp>
 	Signal<Sig_Tp>& EnsureSignal(const std::string& name){
 		if(HasSignal(name)){

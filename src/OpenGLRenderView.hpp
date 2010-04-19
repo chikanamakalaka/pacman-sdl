@@ -76,7 +76,7 @@ protected:
 			glEnable(GL_TEXTURE_COORD_ARRAY);
 
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Changing clear color.");
-			glClearColor( 1.0f, 1.0f, 1.0f, 0.0f );
+			glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
 
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Setting up viewport.");
 			glViewport( 0, 0, 640, 480 );
@@ -119,7 +119,7 @@ protected:
 		}
 	}
 	void BeginRender(boost::shared_ptr<SceneGraph> scenegraph){
-		glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
+		glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
 		glClear( GL_COLOR_BUFFER_BIT );
 	}
 	void Render(boost::shared_ptr<SceneGraph> scenegraph){
@@ -165,7 +165,7 @@ protected:
 			for(; itr != animationsproperty.GetAnimations().end(); itr++){
 				boost::shared_ptr<TextureAnimation> textureanimation = boost::dynamic_pointer_cast<TextureAnimation>(itr->second);
 				if(textureanimation){
-					animationsproperty.AddAnimation(itr->first,vbotextureanimationfactory.CreateFromTextureAnimation(*textureanimation));
+					animationsproperty.AddAnimation(vbotextureanimationfactory.CreateFromTextureAnimation(*textureanimation));
 				}
 			}
 
@@ -214,6 +214,6 @@ private:
 		}
 		glPushMatrix();
 		glMultMatrixf(mptr);
-		delete mptr;
+		delete[] mptr;
 	}
 };

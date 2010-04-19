@@ -162,6 +162,7 @@ SceneNode::ConstSceneNodePtr SceneNode::GetChildNodePtrByName(const std::string&
 	throw SceneNodeDoesNotExist(name.c_str());
 }
 SceneNode::SceneNodePtr SceneNode::GetChildNodePtrByName(const std::string& name){
+	int i = children.size();
 	SceneNodes::iterator itr = children.begin();
 	for(;itr!=children.end(); itr++){
 		if((*itr)->GetName() == name){

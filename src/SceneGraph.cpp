@@ -11,13 +11,16 @@ SceneGraph::SceneGraph():SignalSubscriber(*new SignalBroker, "", "SceneGraph"),r
 
 }
 
-SceneGraph::SceneGraph(SignalBroker& signalbroker):SignalSubscriber(signalbroker, "", "SceneGraph"),root(new SceneGraph::SceneNode("root", *this)){
+SceneGraph::SceneGraph(SignalBroker& signalbroker):SignalSubscriber(signalbroker, "", "SceneGraph"),root(new SceneGraph::SceneNode("root", *this)), signalbrokerptr(false){
 
 }
-SceneGraph::SceneGraph(const SceneGraph& scenegraph):SignalSubscriber(*new SignalBroker, "", "SceneGraph"){
+SceneGraph::SceneGraph(const SceneGraph& scenegraph):SignalSubscriber(*new SignalBroker(), "", "SceneGraph"), signalbrokerptr(true){
 
 }
 SceneGraph::~SceneGraph(){
+	if(signalbrokerptr){
+		delete &(GetSignalBroker());
+	}
 }
 SceneGraph& SceneGraph::operator=(const SceneGraph& scenegraph){
 	return *this;

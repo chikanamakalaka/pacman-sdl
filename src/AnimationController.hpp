@@ -47,7 +47,6 @@ public:
 		if(boost::shared_ptr<SceneGraph> scenegraph = selectedscenegraph.lock()){
 			tf = t/1000.0f;
 			dtf = dt/1000.0f;
-
 			scenegraph->VisitNodes(boost::bind(&AnimationController::AnimateSceneNode, this, _1, tf, dtf));
 		}
 	}

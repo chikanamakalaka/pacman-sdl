@@ -24,6 +24,7 @@ public:
 	typedef boost::function<void(SceneNode&)> NodeProcessor;
 private:
 	SceneNodePtr root;
+	bool signalbrokerptr;
 	SignalBroker signalbroker;
 	SceneNodesByName scenenodesbyname;
 	std::map<std::string, std::list<std::string> > nodeprocessordependencies;
