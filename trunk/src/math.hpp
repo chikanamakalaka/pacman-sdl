@@ -27,7 +27,12 @@ public:
 class Vector3:public  boost::numeric::ublas::vector<float>{
 public:
 	Vector3(): boost::numeric::ublas::vector<float>(3){}
-  Vector3(const boost::numeric::ublas::vector<float>& v):boost::numeric::ublas::vector<float>(v){}
+	Vector3(const boost::numeric::ublas::vector<float>& v):boost::numeric::ublas::vector<float>(v){}
+	Vector3(float x1, float x2, float x3): boost::numeric::ublas::vector<float>(3){
+		(*this)(0) = x1;
+		(*this)(1) = x2;
+		(*this)(2) = x3;
+	}
 	~Vector3(){}
 };
 

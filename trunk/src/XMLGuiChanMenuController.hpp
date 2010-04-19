@@ -14,7 +14,8 @@
 #include <guichan/opengl.hpp>
 #include <guichan/opengl/openglsdlimageloader.hpp>
 #include "xmlguichan/xmlgui.h"
-class XMLGuiChanMenuController:public SignalSubscriber{
+class XMLGuiChanMenuController:public SignalSubscriber, gcn::Widget{
+	void draw(gcn::Graphics*){}
 public:
 	class MenuItemMouseListener : public gcn::MouseListener
 	{
@@ -129,13 +130,16 @@ public:
 
 	SignalBroker& signalbroker;
 
-
-	gcn::SDLInput* input;
-	gcn::OpenGLGraphics* graphics;
-	gcn::OpenGLSDLImageLoader* imageLoader;
-
 	gcn::Gui* gui;
 	XmlGui *xmlgui;
+
+	gcn::OpenGLSDLImageLoader* imageLoader;
+	gcn::OpenGLGraphics* graphics;
+	gcn::SDLInput* input;
+
+	gcn::ImageFont* font;
+	gcn::ImageFont* hoverfont;
+
 	std::string menuname;
 	const std::string signalnamespace;
 	bool menuinitialized;
@@ -146,6 +150,10 @@ public:
 		signalbroker(signalbroker),
 		gui(new gcn::Gui()),
 		xmlgui(new XmlGui()),
+		imageLoader(new gcn::OpenGLSDLImageLoader()),
+		graphics(new gcn::OpenGLGraphics(640,480)),
+		input(new gcn::SDLInput()),
+
 		menuname(menuname),
 		signalnamespace(signalnamespace),
 		menuinitialized(false)
@@ -207,9 +215,16 @@ public:
 
 	}
 	virtual ~XMLGuiChanMenuController(){
-
 		delete xmlgui;
 		delete gui;
+
+		delete font;
+		delete hoverfont;
+
+        delete input;
+        delete graphics;
+        delete imageLoader;
+
 	}
 protected:
 	bool IsMenuInitialized()const{
@@ -223,6 +238,17 @@ protected:
 		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "CreateMenuBase["+menuname+"]:"+name);
 
 		if(name == signalnamespace){
+			gcn::Image::setImageLoader(imageLoader);
+			font = new gcn::ImageFont(FileSystem::MakeUsrLocalPath("/images/fixedfont.png"), " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+			hoverfont = new gcn::ImageFont(FileSystem::MakeUsrLocalPath("/images/hoverfont.png"), " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+
+			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Parsing MainMenu XML");
+
+			gui->setGraphics(graphics);
+			gui->setInput(input);
+
+			gcn::Widget::setGlobalFont(font);
+
 			CreateMenu(name, scenegraph);
 		}
 	}

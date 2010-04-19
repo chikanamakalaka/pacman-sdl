@@ -71,7 +71,9 @@ public:
 					break;
 				case SDL_QUIT:
 					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "SDL_QUIT");
-					exit(0);
+					//std::exit(0);
+					signalbroker.InvokeSignal
+						<ClockView::StopClock>(	"/clock/stop");
 			}
 		}
 	}

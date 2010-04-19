@@ -109,11 +109,11 @@ int main(int argc, char *argv[]) try{
 	SDLAudio sdlaudio(signalbroker);
 	PacmanGamestateLoader pacmangamestateloader(signalbroker);
 	PacmanMainMenuController pacmanmainmenucontroller(signalbroker);
-	PacmanConfigurationMenuController pacmanconfigurationmenucontroller(signalbroker);
+	/*PacmanConfigurationMenuController pacmanconfigurationmenucontroller(signalbroker);
 	PacmanGameGUIController pacmangameguicontroller(signalbroker);
 	PacmanEnterNameGUIController pacmanenternameguicontroller(signalbroker);
 	PacmanHighScoresGUIController pacmanhighscoresguicontroller(signalbroker);
-	PacmanCreditsGUIController pacmancreditsguicontroller(signalbroker);
+	PacmanCreditsGUIController pacmancreditsguicontroller(signalbroker);*/
 	clockview.Start();
 
     return 0;

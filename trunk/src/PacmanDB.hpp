@@ -81,6 +81,9 @@ public:
 			throw PacmanDBException(zErrMsg);
 		}
 	}
+	~PacmanDB(){
+		sqlite3_close(db);
+	}
 
 	std::list<Score> HighScores(){
 		//See: http://souptonuts.sourceforge.net/readme_sqlite_tutorial.html
