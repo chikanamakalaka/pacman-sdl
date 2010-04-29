@@ -95,19 +95,26 @@ private:
 
 	Signals signals;
 	BlockedNamespaces blockednamespaces;
+	bool verbose;
 
 public:
 	const std::string blockstr;
 	const std::string unblockstr;
 
-
 public:
-	SignalBroker():blockstr("/signalbroker/block"), unblockstr("/signalbroker/unblock"){
+	SignalBroker(bool verbose = false):verbose(verbose), blockstr("/signalbroker/block"), unblockstr("/signalbroker/unblock"){
 		CreateSignal<BlockHandler>(blockstr);
 		CreateSignal<UnblockHandler>(unblockstr);
 	}
 	virtual ~SignalBroker(){
+		if(verbose){
+			std::cout << "Deconstructing signalbroker." << std::endl;
+			std::cout << "Here's a list of all the signals:" << std::endl;
+		}
 		for(Signals::iterator itr = signals.begin(); itr!=signals.end(); itr++){
+			if(verbose){
+				std::cout << itr->first << std::endl;
+			}
 			delete itr->second;
 		}
 	}

@@ -47,9 +47,9 @@
 #include "OpenGLRenderView.hpp"
 #include "GuiChanRenderView.hpp"
 #include "PacmanEnterNameGUIController.hpp"
-#include "PacmanLogic.hpp"
 #include "PacmanHighScoresGUIController.hpp"
 #include "PacmanGamestateLoader.hpp"
+#include "PacmanLogic.hpp"
 #include "SDLAudio.hpp"
 #include "PacmanMainMenuController.hpp"
 #include "PacmanConfigurationMenuController.hpp"
@@ -71,8 +71,8 @@ int main(int argc, char *argv[]) try{
 
 	boost::program_options::variables_map vm;
 	try{
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-	boost::program_options::notify(vm);
+		boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+		boost::program_options::notify(vm);
 	}catch(boost::program_options::error e){
 		std::cout<<e.what()<<std::endl;
 		return 1;
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) try{
 		log = true;
 	}
 
-	SignalBroker signalbroker;
+	SignalBroker signalbroker(log);
 	//application agnostic
 	ClockView clockview(signalbroker);
 	TimerView timerview(signalbroker);
@@ -105,20 +105,22 @@ int main(int argc, char *argv[]) try{
 
 	//application specific
 	InputView inputview(signalbroker);
-	//TetrisLogic tetrislogic(signalbroker);
+	PacmanLogic pacmanlogic(signalbroker);
 	SDLAudio sdlaudio(signalbroker);
 	PacmanGamestateLoader pacmangamestateloader(signalbroker);
 	PacmanMainMenuController pacmanmainmenucontroller(signalbroker);
-	/*PacmanConfigurationMenuController pacmanconfigurationmenucontroller(signalbroker);
+	PacmanConfigurationMenuController pacmanconfigurationmenucontroller(signalbroker);
 	PacmanGameGUIController pacmangameguicontroller(signalbroker);
 	PacmanEnterNameGUIController pacmanenternameguicontroller(signalbroker);
 	PacmanHighScoresGUIController pacmanhighscoresguicontroller(signalbroker);
-	PacmanCreditsGUIController pacmancreditsguicontroller(signalbroker);*/
+	PacmanCreditsGUIController pacmancreditsguicontroller(signalbroker);
 	clockview.Start();
 
     return 0;
 }catch(std::exception& e){
 	std::cout << "Error occured. Caught in main(). " << e.what() << std::endl;
 	return 0;
+}catch(...){
+	std::cout << "Error occured. Caught in main(). Unknown error type." << std::endl;
 }
 

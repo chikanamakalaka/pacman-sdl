@@ -1,5 +1,7 @@
 <container name="top" width="640" height="480">
-    <icon name="logo" image="images/mainmenubackground.png" />
+    <!--<icon name="logo" image="/usr/local/games/pileofblocks/images/mainmenubackground.png" />-->
+
+    <icon name="logo" image="./images/mainmenubackground.png" />
     
 	<label name="title" caption="Main Menu" x="300" y="220" />
 	
