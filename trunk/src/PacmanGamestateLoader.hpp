@@ -15,6 +15,9 @@
 #include "xmlguichan/tinyxml.h"
 class PacmanGamestateLoader{
 public:
+	typedef void(LoadSceneGraphFromFileHandler)(const std::string& filepath);
+	typedef void(LoadSceneGraphWithNameFromFileHandler)(const std::string& filepath, const std::string& scenegraphname);
+	typedef void(SceneGraphLoadedFromFileHandler)(boost::shared_ptr<SceneGraph> scenegraphptr);
 	SignalBroker& signalbroker;
 private:
 	SceneGraphController* scenegraphcontroller;
@@ -104,7 +107,7 @@ private:
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Constructed PacmanState");
 
 			//reload game when re-entering the game state
-			signalbroker.InvokeSignal<PacmanLogic::LoadInitialStateHandler>("/logic/loadinitialstate");
+			//signalbroker.InvokeSignal<PacmanLogic::LoadInitialStateHandler>("/logic/loadinitialstate");
 
 			}
 	};
@@ -196,6 +199,19 @@ public:
 			(
 				"/pacmangamestatecontroller/quit",
 				boost::bind(&PacmanGamestateLoader::Quit, this));
+
+		signalbroker.ConnectToSignal
+			<PacmanGamestateLoader::LoadSceneGraphFromFileHandler>
+			(
+				"/pacmangamestateloader/loadscenegraphfromfile",
+				boost::bind(&PacmanGamestateLoader::LoadSceneGraphFromFile, this, _1, ""));
+
+		signalbroker.ConnectToSignal
+			<PacmanGamestateLoader::LoadSceneGraphWithNameFromFileHandler>
+			(
+				"/pacmangamestateloader/loadscenegraphwithnamefromfile",
+				boost::bind(&PacmanGamestateLoader::LoadSceneGraphFromFile, this, _1, _2));
+
 
 		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Initiating gamestates.");
 
@@ -694,12 +710,8 @@ public:
 	}
 
 private:
-	boost::shared_ptr<SceneGraph> LoadSceneGraphFromFile(const std::string& path, const std::string& name=""){
-		boost::shared_ptr<SceneGraph> scenegraph = scenegraphcontroller->CreateSceneGraph(name);
-		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created scenegraph from file");
-
-		SceneNode& root = scenegraph->GetRoot();
-
+	void LoadSceneGraphFromFile(const std::string& path, const std::string& name=""){
+		boost::shared_ptr<SceneGraph> scenegraph;
 
 		TiXmlDocument document(path);
 		document.LoadFile();
@@ -710,6 +722,12 @@ private:
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Found <level>");
 
 			const std::string* id = level->Attribute("id");
+
+			scenegraph = scenegraphcontroller->CreateSceneGraph(id?*id:name);
+			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created scenegraph from file");
+
+			SceneNode& root = scenegraph->GetRoot();
+
 			SceneNode& levelnode = root.CreateChildNode(id?*id:"");
 
 			std::map<std::string, boost::shared_ptr<SceneNodeProperty> > textures;
@@ -938,6 +956,7 @@ private:
 			}
 			root.DeleteChildNodeByName("spritesheets");
 		}
-		return scenegraph;
+
+		signalbroker.InvokeSignal<PacmanGamestateLoader::SceneGraphLoadedFromFileHandler>("/pacmangamestateloader/scenegraphloadedfromfile", scenegraph);
 	}
 };

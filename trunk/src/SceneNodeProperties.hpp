@@ -4,6 +4,8 @@
  *  Created on: May 6, 2009
  *      Author: asantos
  */
+#include <boost/property_map/property_map.hpp>
+#include <boost/any.hpp>
 
 class ITexture:public Cloneable<ITexture>{
 public:
@@ -389,3 +391,21 @@ public:
 		return &physical;
 	}
 };
+class DataProperty: public SceneNodeProperty{
+private:
+	boost::associative_property_map<std::map<std::string, boost::any> > properties;
+public:
+	DataProperty(){}
+	template<typename ValueTp>
+	void put(const std::string& key, ValueTp value){
+		boost::put(properties, key, boost::any(value));
+	}
+	boost::any get(const std::string& key){
+		return boost::get(properties, key);
+	}
+	template<typename ValueTp>
+	ValueTp get(const std::string& key){
+		return boost::any_cast<ValueTp>(boost::get(properties, key));
+	}
+};
+

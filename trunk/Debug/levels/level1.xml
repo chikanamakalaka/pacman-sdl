@@ -43,6 +43,14 @@
 			<sprite id="bottomrightbumpin" u0="32" v0="448" u1="48" v1="464" />
 			<sprite id="bottomleftbumpup" u0="16" v0="464" u1="32" v1="480" />
 			<sprite id="bottomrightbumpup" u0="32" v0="464" u1="48" v1="480" />
+			<sprite id="inkyup0" u0="64" v0="48" u1="96" v1="96" />
+			<sprite id="inkyup1" u0="96" v0="48" u1="128" v1="96" />
+			<sprite id="inkydown0" u0="128" v0="48" u1="160" v1="96" />
+			<sprite id="inkydown1" u0="160" v0="48" u1="192" v1="96" />
+			<sprite id="inkyleft0" u0="192" v0="48" u1="224" v1="96" />
+			<sprite id="inkyleft1" u0="224" v0="48" u1="256" v1="96" />
+			<sprite id="inkyright0" u0="256" v0="48" u1="288" v1="96" />
+			<sprite id="inkyright1" u0="288" v0="48" u1="320" v1="96" />
 			<!--<sprite id="" u0="" v0="" u1="" v1="" />-->
 		</spritesheet>
 	</spritesheets>
