@@ -23,28 +23,35 @@ public:
 			signalbroker.EnsureSignal<KeyDownHandler>("/sdlevent/keydown");
 			signalbroker.EnsureSignal<KeyUpHandler>("/sdlevent/keyup");
 
+			SDL_Init(SDL_INIT_EVERYTHING);
+
 
 		}catch(SignalDoesNotExist& e){
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", std::string(e.what()));
 		}
 	}
+	~SDLEventsView(){
+		SDL_Quit();
+	}
 	void PollEvents(long t, long dt){
-		SDL_Event event;
+		//signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "SDL_PollEvent");
+		SDL_Event event = {};
 		while ( SDL_PollEvent(&event) ) {
+			//signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Got SDL Event");
 			signalbroker.InvokeSignal<SDLEventHandler>("/sdlevent/event", event);
 			switch (event.type) {
 				case SDL_ACTIVEEVENT:
 					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "SDL_ACTIVEEVENT");
-				break;
+					break;
 				case SDL_VIDEOEXPOSE:
 					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "SDL_VIDEOEXPOSE");
-				break;
+					break;
 				case SDL_SYSWMEVENT:
 					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "SDL_SYSWMEVENT");
-				break;
+					break;
 				case SDL_VIDEORESIZE:
 					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "SDL_VIDEORESIZE");
-				break;
+					break;
 				case SDL_MOUSEMOTION:
 					{
 					/*std::stringstream ss;
@@ -63,6 +70,14 @@ public:
 					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", ss.str());
 					}
 					break;
+				case SDL_MOUSEBUTTONUP:
+					{
+					std::stringstream ss;
+					ss << "Mouse button " << event.button.button << " unpressed at "
+						<< "(" << event.button.x << "," << event.button.y << ")";
+					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", ss.str());
+					}
+					break;
 				case SDL_KEYDOWN:
 					signalbroker.InvokeSignal<KeyDownHandler>("/sdlevent/keydown", event);
 					break;
@@ -71,9 +86,16 @@ public:
 					break;
 				case SDL_QUIT:
 					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "SDL_QUIT");
-					//std::exit(0);
 					signalbroker.InvokeSignal
 						<ClockView::StopClock>(	"/clock/stop");
+					break;
+				default:
+					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Unhandled SDL event");
+					{
+						std::stringstream ss;
+						ss << "event.type:" << event.type;
+						signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", ss.str());
+					}
 			}
 		}
 	}

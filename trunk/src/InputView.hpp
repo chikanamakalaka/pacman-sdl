@@ -57,17 +57,11 @@ public:
 			<InputView::RefreshKeyBindingsHandler>
 			(	"/pacmaninput/refreshkeybindings",
 				boost::bind(&InputView::RefreshKeyBindings, this));
-
-
-			/*signalbroker.EnsureSignal<PlayerMovementHandler>("/input/player/moveleft");
-			signalbroker.EnsureSignal<PlayerMovementHandler>("/input/player/moveright");
-			signalbroker.EnsureSignal<PlayerMovementHandler>("/input/player/movedown");
-			signalbroker.EnsureSignal<PlayerMovementHandler>("/input/player/movenormal");
-			signalbroker.EnsureSignal<PlayerMovementHandler>("/input/player/rotate");*/
-
 			RefreshKeyBindings();
 
-			//keyheldbindings[SDLK_ESCAPE] = boost::bind(&InputView::Quit, this, _1, _2);
+			//keyheldbindings[SDLK_ESCAPE] = "/pacmangamestatecontroller/quit";
+			//keydownbindings.insert(std::multimap<std::string,std::string>::value_type("(esc)", "/pacmangamestatecontroller/quit"));
+
 		}catch(SignalDoesNotExist& e){
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", std::string(e.what()));
 		}
@@ -79,29 +73,6 @@ public:
 		keyupbindings = pacmandb.GetKeyUpBindings();
 		keydownbindings = pacmandb.GetKeyDownBindings();
 		keyheldbindings = pacmandb.GetKeyHeldBindings();
-
-		/*boost::bimap<int,std::string>::right_const_iterator itr = keybindings.right.find("Left");
-		{
-			keydownbindings[itr->second] = boost::bind(&InputView::PlayerMoveLeft, this);
-		}
-		{
-			boost::bimap<int,std::string>::right_const_iterator itr = keybindings.right.find("Right");
-			keydownbindings[itr->second] = boost::bind(&InputView::PlayerMoveRight, this);
-		}
-
-		{
-			boost::bimap<int,std::string>::right_const_iterator itr = keybindings.right.find("Rotate");
-			keydownbindings[itr->second] = boost::bind(&InputView::PlayerRotate, this);
-		}
-
-		{
-			boost::bimap<int,std::string>::right_const_iterator itr = keybindings.right.find("Down");
-			keydownbindings[itr->second] = boost::bind(&InputView::PlayerMoveDown, this);
-			keyupbindings[itr->second] = boost::bind(&InputView::PlayerMoveNormal, this);
-		}
-		*/
-
-
 	}
 	void KeyUp(SDL_Event event){
 		SDLInput sdlinput;
@@ -158,25 +129,6 @@ public:
 				}
 			}
 		}
-	}
-
-	void PlayerMoveLeft(){
-		signalbroker.InvokeSignal<PlayerMovementHandler>("/input/player/moveleft");
-	}
-	void PlayerMoveRight(){
-		signalbroker.InvokeSignal<PlayerMovementHandler>("/input/player/moveright");
-	}
-	void PlayerMoveDown(){
-		signalbroker.InvokeSignal<PlayerMovementHandler>("/input/player/movedown");
-	}
-	void PlayerMoveNormal(){
-		signalbroker.InvokeSignal<PlayerMovementHandler>("/input/player/movenormal");
-	}
-	void PlayerRotate(){
-		signalbroker.InvokeSignal<PlayerMovementHandler>("/input/player/rotate");
-	}
-	void Quit(long t, long dt){
-		signalbroker.InvokeSignal<GamestateController::StateChangeHandler>("/pacmangamestatecontroller/quit");
 	}
 };
 
