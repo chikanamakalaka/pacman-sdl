@@ -22,11 +22,11 @@ public:
 };
 #define PACMAN_DEBUG
 #ifdef PACMAN_DEBUG
-	std::string FileSystem::usrlocal = std::string(".");
-	std::string FileSystem::vargames = std::string(".");
+	std::string FileSystem::usrlocal = ".";
+	std::string FileSystem::vargames = ".";
 #else
-	std::string FileSystem::usrlocal = std::string("/usr/local/games/pacman");
-	std::string FileSystem::vargames = std::string("/var/games/pacman");
+	std::string FileSystem::usrlocal = "/usr/local/games/pacman";
+	std::string FileSystem::vargames = "/var/games/pacman";
 #endif
 
 

@@ -153,7 +153,8 @@ public:
 		imageLoader(new gcn::OpenGLSDLImageLoader()),
 		graphics(new gcn::OpenGLGraphics(640,480)),
 		input(new gcn::SDLInput()),
-
+		font(NULL),
+		hoverfont(NULL),
 		menuname(menuname),
 		signalnamespace(signalnamespace),
 		menuinitialized(false)
@@ -218,8 +219,12 @@ public:
 		delete xmlgui;
 		delete gui;
 
-		delete font;
-		delete hoverfont;
+		if(font){
+			delete font;
+		}
+		if(hoverfont){
+			delete hoverfont;
+		}
 
         delete input;
         delete graphics;
@@ -239,6 +244,7 @@ protected:
 
 		if(name == signalnamespace){
 			gcn::Image::setImageLoader(imageLoader);
+
 			font = new gcn::ImageFont(FileSystem::MakeUsrLocalPath("/images/fixedfont.png"), " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 			hoverfont = new gcn::ImageFont(FileSystem::MakeUsrLocalPath("/images/hoverfont.png"), " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 

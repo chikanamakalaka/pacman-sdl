@@ -26,6 +26,7 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
 #include <SDL/SDL_ttf.h>
+//#include <SDL/SDL_opengl.h>
 #include "math.hpp"
 #include "FileSystem.hpp"
 #include "SignalBroker.hpp"
@@ -61,7 +62,7 @@
 int main(int argc, char *argv[]) try{
 	// Declare the supported options.
 	boost::program_options::options_description desc(
-			"Usage: pileofblocks [OPTION...]\n"
+			"Usage: pacman [OPTION...]\n"
 	);
 	desc.add_options()
 	    ("help", "help message")
@@ -82,7 +83,7 @@ int main(int argc, char *argv[]) try{
 	    std::cout << desc << std::endl;
 	    return 1;
 	}else if(vm.count("version") || vm.count("V")){
-		std::cout<<"pileofblocks - Version 1.0.0"<<std::endl;
+		std::cout<<"pacman - Version 1.0.0"<<std::endl;
 		return 1;
 	}
 	bool log = false;
@@ -105,7 +106,7 @@ int main(int argc, char *argv[]) try{
 
 	//application specific
 	InputView inputview(signalbroker);
-	PacmanLogic pacmanlogic(signalbroker);
+	//PacmanLogic pacmanlogic(signalbroker);
 	SDLAudio sdlaudio(signalbroker);
 	PacmanGamestateLoader pacmangamestateloader(signalbroker);
 	PacmanMainMenuController pacmanmainmenucontroller(signalbroker);

@@ -15,7 +15,7 @@ public:
 	}
 	~SceneGraphAlreadyExists()throw(){}
 	char const* what()const throw(){
-		return ("SceneGraphAlreadyExists"+msg).c_str();
+		return ("SceneGraphAlreadyExists "+msg).c_str();
 	}
 };
 class SceneGraphDoesNotExist : public virtual std::exception{
@@ -27,7 +27,7 @@ public:
 	}
 	~SceneGraphDoesNotExist()throw(){}
 	char const* what()const throw(){
-		return ("SceneGraphDoesNotExist"+msg).c_str();
+		return ("SceneGraphDoesNotExist "+msg).c_str();
 	}
 };
 
@@ -97,7 +97,7 @@ public:
 		if(scenegraphs.find(name)!=scenegraphs.end()){
 			selectedscenegraph = scenegraphs.find(name)->second;
 		}else{
-			throw SceneGraphDoesNotExist("Trying to select scenegraph that does not exist");
+			throw SceneGraphDoesNotExist("Trying to select scenegraph that does not exist:" + name);
 		}
 	}
 	void GetSelectedSceneGraph(long t, long dt){

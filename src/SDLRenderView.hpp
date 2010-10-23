@@ -20,19 +20,17 @@ public:
 	}
 	void Initialize(){
 		try{
-			if ( SDL_Init(SDL_INIT_EVERYTHING) < 0 ) {
+			if ( SDL_InitSubSystem(SDL_INIT_VIDEO) < 0 ) {
 				signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Unable to init SDL");
-				exit(1);
+				signalbroker.InvokeSignal<ClockView::StopClock>("/clock/stop");
 			}else{
 				signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Initialized SDL successfully");
 
 
-				SDL_Surface *screen;
-
-				screen = SDL_SetVideoMode(640, 480, 16, SDL_OPENGL);
-				if ( screen == NULL ) {
+				SDL_Surface *screen = SDL_SetVideoMode(640, 480, 16, SDL_OPENGL);
+				if(screen == NULL){
 					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Unable to set 640x480 video: " );
-					exit(1);
+					signalbroker.InvokeSignal<ClockView::StopClock>("/clock/stop");
 				}
 				else{
 					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Able to set 640x480 video successfully");
