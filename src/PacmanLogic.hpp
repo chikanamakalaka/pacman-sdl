@@ -45,7 +45,7 @@ private:
 	std::vector<SceneNodePtr> dots;
 	std::vector<SceneNodePtr> powerups;
 
-	std::vector<std::vector<bool> > collisionmap;
+	boost::numeric::ublas::matrix<bool> collisionmap;
 	boost::mt19937 rng;
 	boost::uniform_int<> seven;
 	boost::variate_generator<boost::mt19937&, boost::uniform_int<> > die;
@@ -130,14 +130,12 @@ public:
 		int maxy = 0;
 
 
-		//make a blank new collision map
-		collisionmap.resize(20);
-		for(int i=0; i<20; i++){
-			collisionmap[i].resize(10);
-			for(int j=0; j<10; j++){
-				collisionmap[i][j] = false;
-			}
+		//get the level's collision map
+		SceneNodePtr level = scenegraphptr->GetNodePtrByPath("/root/level");
+		if(level->HasSceneNodeProperty("pacmanlogicdata")){
+			collisionmap.assign_temporary(level->GetSceneNodeProperty<PacmanLogicDataProperty>("pacmanlogicdata").GetCollisionMap());
 		}
+
 		//TODO:capture fruit
 		//TODO:capture dots
 		//TODO:capture powerups
@@ -146,19 +144,11 @@ public:
 			//Process logic at appropriate interval
 			signalbroker.InvokeSignal<TimerView::IntervalHandler>(
 					"/timer/setinterval",
-					"/pacmanlogic/processlogic", boost::bind(&PacmanLogic::ProcessLogic, this, _1, _2), IntervalPerLevel(level));
+					"/pacmanlogic/processlogic", boost::bind(&PacmanLogic::ProcessLogic, this, _1, _2), 100);
 
 	}
 
 	void LoadInitialState(){
-		//make a blank new collision map
-		collisionmap.resize(20);
-		for(int i=0; i<20; i++){
-			collisionmap[i].resize(10);
-			for(int j=0; j<10; j++){
-				collisionmap[i][j] = false;
-			}
-		}
 
 		score = 0;
 		level = 0;

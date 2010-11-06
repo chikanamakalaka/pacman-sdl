@@ -10,7 +10,7 @@ xmlgui.lo: xmlgui.cpp xmlgui.h /usr/include/guichan.hpp \
  /usr/include/c++/4.4/bits/stringfwd.h \
  /usr/include/c++/4.4/bits/char_traits.h \
  /usr/include/c++/4.4/bits/stl_algobase.h /usr/include/c++/4.4/cstddef \
- /usr/lib/gcc/i486-linux-gnu/4.4.1/include/stddef.h \
+ /usr/lib/gcc/i486-linux-gnu/4.4.3/include/stddef.h \
  /usr/include/c++/4.4/bits/functexcept.h \
  /usr/include/c++/4.4/exception_defines.h \
  /usr/include/c++/4.4/bits/cpp_type_traits.h \
@@ -23,7 +23,7 @@ xmlgui.lo: xmlgui.cpp xmlgui.h /usr/include/guichan.hpp \
  /usr/include/c++/4.4/bits/stl_iterator.h \
  /usr/include/c++/4.4/debug/debug.h /usr/include/c++/4.4/bits/postypes.h \
  /usr/include/c++/4.4/cwchar /usr/include/wchar.h /usr/include/stdio.h \
- /usr/lib/gcc/i486-linux-gnu/4.4.1/include/stdarg.h \
+ /usr/lib/gcc/i486-linux-gnu/4.4.3/include/stdarg.h \
  /usr/include/bits/wchar.h /usr/include/xlocale.h \
  /usr/include/bits/wchar2.h /usr/include/c++/4.4/bits/allocator.h \
  /usr/include/c++/4.4/i486-linux-gnu/bits/c++allocator.h \
@@ -164,7 +164,7 @@ xmlgui.h:
 
 /usr/include/c++/4.4/cstddef:
 
-/usr/lib/gcc/i486-linux-gnu/4.4.1/include/stddef.h:
+/usr/lib/gcc/i486-linux-gnu/4.4.3/include/stddef.h:
 
 /usr/include/c++/4.4/bits/functexcept.h:
 
@@ -198,7 +198,7 @@ xmlgui.h:
 
 /usr/include/stdio.h:
 
-/usr/lib/gcc/i486-linux-gnu/4.4.1/include/stdarg.h:
+/usr/lib/gcc/i486-linux-gnu/4.4.3/include/stdarg.h:
 
 /usr/include/bits/wchar.h:
 

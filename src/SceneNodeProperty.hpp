@@ -15,12 +15,15 @@ public:
 	//virtual boost::shared_ptr<SceneNodeProperty> Clone()const = 0;
 };
 class SceneNodePropertyAlreadyExists : public virtual std::exception{
+private:
+	const std::string msg;
 public:
-	SceneNodePropertyAlreadyExists(const char* msg){
+	SceneNodePropertyAlreadyExists(const std::string& msg=""):msg(msg){
 
 	}
+	virtual ~SceneNodePropertyAlreadyExists()throw(){}
 	char const* what()const throw(){
-		return "SceneNodePropertyAlreadyExists";
+		return ("SceneNodePropertyAlreadyExists "+msg).c_str();
 	}
 };
 class SceneNodePropertyDoesNotExist : public virtual std::exception{
