@@ -49,7 +49,7 @@ SceneNodeProperty& SceneNode::AddSceneNodeProperty(const std::string& name, Scen
 		scenegraph.ProcessNode(*this, name);
 		return *scenenodeproperty;
 	}else{
-		throw SceneNodePropertyAlreadyExists(name.c_str());
+		throw SceneNodePropertyAlreadyExists("SceneNode:"+this->name+" Property:"+name);
 	}
 }
 SceneNodeProperty& SceneNode::GetSceneNodeProperty(const std::string& name)const{

@@ -20,13 +20,14 @@
 
 class SceneNodeDoesNotExist : public virtual std::exception{
 private:
-		const char* msg;
+		const std::string msg;
 public:
-	SceneNodeDoesNotExist(const char* msg):msg(msg){
+	SceneNodeDoesNotExist(const std::string& msg):msg(msg){
 
 	}
+	virtual ~SceneNodeDoesNotExist()throw(){}
 	char const* what()const throw(){
-		return msg;
+		return msg.c_str();
 	}
 };
 

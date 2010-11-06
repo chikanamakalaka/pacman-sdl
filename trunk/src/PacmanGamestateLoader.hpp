@@ -723,12 +723,17 @@ private:
 
 			const std::string* id = level->Attribute("id");
 
-			scenegraph = scenegraphcontroller->CreateSceneGraph(id?*id:name);
+			scenegraph = scenegraphcontroller->CreateSceneGraph(!name.empty()?name:(id?*id:""));
 			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Created scenegraph from file");
 
 			SceneNode& root = scenegraph->GetRoot();
 
-			SceneNode& levelnode = root.CreateChildNode(id?*id:"");
+			SceneNode& levelnode = root.CreateChildNode("level");
+
+			//add pacman logic data to the level node
+			PacmanLogicDataProperty& pacmanlogicdata = levelnode.AddSceneNodeProperty("pacmanlogicdata", boost::shared_ptr<PacmanLogicDataProperty>(new PacmanLogicDataProperty()));
+			boost::numeric::ublas::matrix<bool>& collisionmap = pacmanlogicdata.GetCollisionMap();
+
 
 			std::map<std::string, boost::shared_ptr<SceneNodeProperty> > textures;
 
@@ -804,6 +809,7 @@ private:
 								sprite->AddVertex(Vertex(0,height,1, u0/filewidth,v1/fileheight));
 								sprite->AddVertex(Vertex(width,height,1, u1/filewidth,v1/fileheight));
 
+								/*
 								std::stringstream ss;
 								ss<<"creating sprite"<<*id<<std::endl
 								<<"width:"<<width<<std::endl
@@ -811,7 +817,7 @@ private:
 								<<"(u0,v0):"<<"("<<u0/filewidth<<","<<v0/fileheight<<")"<<std::endl
 								<<"(u1,v1):"<<"("<<u1/filewidth<<","<<v1/fileheight<<")"<<std::endl;
 								signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", ss.str());
-
+								*/
 
 								spritenode->AddSceneNodeProperty("geometry", boost::shared_ptr<SceneNodeProperty>(new GeometryProperty(sprite)));
 								spritenode->AddSceneNodeProperty("texture", boost::shared_ptr<SceneNodeProperty>(new TextureProperty(FileSystem::MakeUsrLocalPath(*filepath))));
@@ -833,11 +839,24 @@ private:
 				while(layer){
 
 					const std::string* id = layer->Attribute("id");
+					float x = 0.0f;
+					float y = 0.0f;
+					float z = 0.0f;
+					layer->Attribute("x", &x);
+					layer->Attribute("y", &y);
+					layer->Attribute("z", &z);
+
 					SceneNode& layernode = levelnode.CreateChildNode(id?*id:"");
+
+					PositionProperty& position = layernode.AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
+					Matrix4& m = position.GetPosition();
+					//[row, column]
+					m(0,3) = x;
+					m(1,3) = y;
+					m(2,3) = z;
 
 					const TiXmlElement* element = layer->FirstChildElement();
 					while(element){
-
 						if(element->Value()=="spritegrid"){
 							const std::string* id = element->Attribute("id");
 							float horizontalcellspacing = 16.0f;
@@ -867,8 +886,10 @@ private:
 								const std::string* spriteid = spritecell->Attribute("spriteid");
 								float x = 0.0f;
 								float y = 0.0f;
+								bool collision = false;
 								spritecell->Attribute("x", &x);
 								spritecell->Attribute("y", &y);
+								spritecell->Attribute("collision", &collision);
 
 								if(spriteid){
 									SceneNode::SceneNodePtr spritenode = sprites[*spriteid]->Clone();
@@ -882,76 +903,110 @@ private:
 									m(0,3) = x * horizontalcellspacing;
 									m(1,3) = y * verticalcellspacing;
 
+									//resize rows if too small
+									if(collisionmap.size1()<y+1){
+										collisionmap.resize(y+1, collisionmap.size2());
+									}
+									//resize columns if too small
+									if(collisionmap.size2()<x+1){
+										collisionmap.resize(collisionmap.size1(), x+1);
+									}
+									collisionmap(y, x)=collision;
+
+									/*
 									std::stringstream ss;
 									ss<<"placing sprite: "<<*spriteid<<std::endl
 									<<"x:"<<m(0,3)<<std::endl
 									<<"y:"<<m(1,3)<<std::endl;
 									signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", ss.str());
-
+									*/
 
 									spritegridnode.AddChildNode(spritenode);
 								}
 								spritecell = spritecell->NextSiblingElement("spritecell");
 							}
+						} else if(element->Value() == "character"){
+
+							const TiXmlElement* character = element;
+
+							const std::string* id = character->Attribute("id");
+							std::cout << "Got character id:"<<*id<<std::endl;
+							const std::string* spriteid = character->Attribute("spriteid");
+							float x = 0.0f;
+							float y = 0.0f;
+							character->Attribute("x", &x);
+							character->Attribute("y", &y);
+
+							SceneNode::SceneNodePtr characternode = sprites[*spriteid]->Clone();
+							characternode->SetName(id?*id:"");
+
+							layernode.AddChildNode(characternode);
+
+							PositionProperty& position = characternode->AddSceneNodeProperty("position", boost::shared_ptr<PositionProperty>(new PositionProperty()));
+							Matrix4& m = position.GetPosition();
+							//[row, column]
+							m(0,3) = x;
+							m(1,3) = y;
+
+							std::map<std::string, boost::shared_ptr<IAnimation> > animationsmap;
+							const TiXmlElement* animation = character->FirstChildElement("animation");
+							std::string defaultanimationname;
+							while(animation){
+								std::map<float, std::vector<TextureAnimationKey> > textureanimationkeys;
+								const std::string* id = animation->Attribute("id");
+								std::cout << "Got animation id:"<<*id<<std::endl;
+								bool loop = false;
+								std::string defaultanimation;
+								animation->Attribute("loop", &loop);
+								if(animation->Attribute("default") && *(animation->Attribute("default")) == "true"){
+									defaultanimationname = *id;
+								}
+								const TiXmlElement* frame = animation->FirstChildElement("frame");
+								while(frame){
+									const std::string* spriteid = frame->Attribute("spriteid");
+									float time = 0.0f;
+									frame->Attribute("time", &time);
+									std::vector<TextureAnimationKey> textureanimationkey;
+									if(spriteid){
+										std::map<std::string, boost::shared_ptr<SceneNode> >::const_iterator itr = sprites.find(*spriteid);
+										if(itr != sprites.end()){
+											const GeometryProperty& geometryproperty = itr->second->GetSceneNodeProperty<GeometryProperty>("geometry");
+											const TriangleStrip* trianglestrip = dynamic_cast<const TriangleStrip*>(&(geometryproperty.GetGeometry()));
+											if(trianglestrip){
+												std::list<Vertex>::const_iterator itr = trianglestrip->GetVertices().begin();
+												for(;itr != trianglestrip->GetVertices().end(); itr++){
+													textureanimationkey.push_back(TextureAnimationKey(Vector2(itr->GetTextureU(), itr->GetTextureV())));
+												}
+												std::cout<<"got texture animation key for "+*spriteid+" "+*id<<std::endl;
+											}
+										}
+									}
+									textureanimationkeys[time] = textureanimationkey;
+									frame = frame->NextSiblingElement("frame");
+								}
+								{
+									boost::shared_ptr<IAnimation> animation(new TextureAnimation(textureanimationkeys, id?*id:"", loop));
+									animation->Play();
+									animationsmap[id?*id:""] = animation;
+								}
+
+								animation = animation->NextSiblingElement("animation");
+							}
+							std::cout << "default animation name:"<<defaultanimationname<<std::endl;
+
+							boost::shared_ptr<AnimationsProperty> animationsproperty(new AnimationsProperty(animationsmap));
+							animationsproperty->SelectAnimation(defaultanimationname);
+							characternode->AddSceneNodeProperty("animations", animationsproperty);
+
+							if(character->Value()=="playercharacter"){
+
+							}else if(character->Value()=="nonplayercharacter"){
+
+							}
 						}
 						element = element->NextSiblingElement();
 					}
 					layer = layer->NextSiblingElement("layer");
-				}
-			}
-
-			//Load characters
-			const TiXmlElement* characters = level->FirstChildElement("characters");
-			if(characters){
-				const TiXmlElement* character = characters->FirstChildElement();
-				while(character){
-					const std::string* id = character->Attribute("id");
-					SceneNode& characternode = root.CreateChildNode(id?*id:"");
-					const TiXmlElement* animations = character->FirstChildElement("animations");
-					if(animations)
-					{
-						std::map<std::string, boost::shared_ptr<IAnimation> > animationsmap;
-						const TiXmlElement* animation = animations->FirstChildElement("animaton");
-						while(animation){
-							std::map<float, std::vector<TextureAnimationKey> > textureanimationkeys;
-							const std::string* id = animation->Attribute("id");
-							bool loop = false;
-							animation->Attribute("loop", &loop);
-							const TiXmlElement* frame = animation->FirstChildElement("frame");
-							while(frame){
-								const std::string* spriteid = frame->Attribute("spriteid");
-								float time = 0.0f;
-								frame->Attribute("time", &time);
-								std::vector<TextureAnimationKey> textureanimationkey;
-								if(spriteid){
-									std::map<std::string, boost::shared_ptr<SceneNode> >::const_iterator itr = sprites.find(*spriteid);
-									if(itr != sprites.end()){
-										const GeometryProperty& geometryproperty = itr->second->GetSceneNodeProperty<GeometryProperty>("geometry");
-										const TriangleStrip* trianglestrip = dynamic_cast<const TriangleStrip*>(&(geometryproperty.GetGeometry()));
-										if(trianglestrip){
-											std::list<Vertex>::const_iterator itr = trianglestrip->GetVertices().begin();
-											for(;itr != trianglestrip->GetVertices().end(); itr++){
-												textureanimationkey.push_back(TextureAnimationKey(Vector2(itr->GetTextureU(), itr->GetTextureV())));
-											}
-										}
-									}
-								}
-								textureanimationkeys[time] = textureanimationkey;
-								frame = frame->NextSiblingElement("frame");
-							}
-							animationsmap[id?*id:""] = boost::shared_ptr<IAnimation>(new TextureAnimation(textureanimationkeys, id?*id:"", loop));
-							animation = animation->NextSiblingElement("animation");
-						}
-						characternode.AddSceneNodeProperty("animations", boost::shared_ptr<AnimationsProperty>(new AnimationsProperty(animationsmap)));
-
-					}
-					if(character->Value()=="playercharacter"){
-
-					}else if(character->Value()=="nonplayercharacter"){
-
-					}
-
-					character = character->NextSiblingElement();
 				}
 			}
 			root.DeleteChildNodeByName("spritesheets");

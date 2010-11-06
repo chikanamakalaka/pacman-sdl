@@ -49,6 +49,7 @@
 #include "GuiChanRenderView.hpp"
 #include "PacmanEnterNameGUIController.hpp"
 #include "PacmanHighScoresGUIController.hpp"
+#include "PacmanLogicData.hpp"
 #include "PacmanGamestateLoader.hpp"
 #include "PacmanLogic.hpp"
 #include "SDLAudio.hpp"

@@ -141,7 +141,6 @@ protected:
 	void OpenGLNodeProcessor(SceneGraph::SceneNode& scenenode){
 		//has geometry but no openglvbo?
 		if(scenenode.HasSceneNodeProperty("geometry") && !scenenode.HasSceneNodeProperty("renderable") && scenenode.HasSceneNodeProperty("texture")){
-			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Processing geometry property into opengldisplaylist property.");
 			//create the openglvbo from the geometry
 			Geometry& geometry = scenenode.GetSceneNodeProperty<GeometryProperty>("geometry").GetGeometry();
 			//PositionProperty& positionproperty scenenode.GetSceneNodeProperty<PositionProperty>("position");
@@ -151,12 +150,16 @@ protected:
 			boost::shared_ptr<ITexture> texture = texturefactory.LoadFromFilePath(scenenode.GetSceneNodeProperty<TextureProperty>("texture").GetPathToTexture());
 
 			if(true){
+				//signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Processing geometry property into openglvbo property.");
+
 				boost::shared_ptr<IRenderable> vbo = vbofactory.CreateFromTriangleStrip(trianglestrip);
 				scenenode.AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(vbo, texture)));
 
 			}else{
-			//boost::shared_ptr<IRenderable> displaylist = displaylistfactory.CreateFromTriangleStrip(trianglestrip);
-			//scenenode.AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(displaylist, texture)));
+				//signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "Processing geometry property into opengldisplaylist property.");
+
+				boost::shared_ptr<IRenderable> displaylist = displaylistfactory.CreateFromTriangleStrip(trianglestrip);
+				scenenode.AddSceneNodeProperty("renderable", boost::shared_ptr<SceneNodeProperty>(new RenderableProperty(displaylist, texture)));
 			}
 		}
 		if(scenenode.HasSceneNodeProperty("animations")){
@@ -206,7 +209,7 @@ protected:
 	}
 private:
 	void PushMatrix4(const Matrix4& m){
-		GLfloat* mptr = new GLfloat[16];
+		static GLfloat mptr[16];
 		for(int i=0; i<4; i++){
 			for(int j=0; j<4; j++){
 				mptr[j*4+i] = m(i,j);
@@ -214,6 +217,5 @@ private:
 		}
 		glPushMatrix();
 		glMultMatrixf(mptr);
-		delete[] mptr;
 	}
 };
