@@ -7,7 +7,7 @@
 
 #include "SceneGraph.h"
 
-SceneGraph::SceneGraph():SignalSubscriber(*new SignalBroker, "", "SceneGraph"),root(new SceneGraph::SceneNode("root", *this)){
+SceneGraph::SceneGraph(const std::string& name):SignalSubscriber(*new SignalBroker, "", "SceneGraph"),name(name), root(new SceneGraph::SceneNode("root", *this)){
 
 }
 
@@ -18,12 +18,17 @@ SceneGraph::SceneGraph(const SceneGraph& scenegraph):SignalSubscriber(*new Signa
 
 }
 SceneGraph::~SceneGraph(){
+
+	VisitNodesWithPushPop(PrintNodeTree());
 	if(signalbrokerptr){
 		delete &(GetSignalBroker());
 	}
 }
 SceneGraph& SceneGraph::operator=(const SceneGraph& scenegraph){
 	return *this;
+}
+const std::string& SceneGraph::GetName()const{
+	return name;
 }
 SceneGraph::SceneNode& SceneGraph::GetRoot(){
 	return *root;
@@ -32,21 +37,19 @@ const SceneGraph::SceneNode& SceneGraph::GetRoot()const{
 	return *root;
 }
 
-const SceneGraph::SceneNode& SceneGraph::GetNodeByPath(const std::string& path){
-	if(scenenodesbyname.find(path)!=scenenodesbyname.end()){
-		return *(scenenodesbyname.find(path)->second);
-	} else{
-		throw "SceneNodeDoesNotExistAtPath";
-	}
+SceneGraph::SceneNode& SceneGraph::GetNodeByPath(const std::string& path){
+	return *(GetRoot().GetDescendantNodePtrByPath(path));
+}
+const SceneGraph::SceneNode& SceneGraph::GetNodeByPath(const std::string& path)const{
+	return *(GetRoot().GetDescendantNodePtrByPath(path));
 }
 
 
 SceneGraph::SceneNodePtr SceneGraph::GetNodePtrByPath(const std::string& path){
-	if(scenenodesbyname.find(path)!=scenenodesbyname.end()){
-		return scenenodesbyname.find(path)->second;
-	} else{
-		throw "SceneNodeDoesNotExistAtPath";
-	}
+	return GetRoot().GetDescendantNodePtrByPath(path);
+}
+SceneGraph::ConstSceneNodePtr SceneGraph::GetNodePtrByPath(const std::string& path)const{
+	return GetRoot().GetDescendantNodePtrByPath(path);
 }
 bool SceneGraph::HasNodeProcessor(const std::string& propertykey){
 	return nodeprocessordependencies.find(propertykey)!=nodeprocessordependencies.end();

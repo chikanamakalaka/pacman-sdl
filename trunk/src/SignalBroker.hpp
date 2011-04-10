@@ -10,13 +10,15 @@
 
 #include <iostream>
 #include <string>
-#include <map>
+#include <boost/functional.hpp>
+#include <boost/unordered_map.hpp>
 #include <set>
 #include <boost/signals.hpp>
 #include <boost/function.hpp>
 #include <boost/type_traits.hpp>
 #include "ArgsList.hpp"
 class SignalSubsrciber;
+
 
 template<typename Sig_Tp>
 class Signal;
@@ -90,7 +92,7 @@ public:
 	typedef void(UnblockHandler)(const std::string&);
 	typedef void(GenericHandler)(const ArgsList& args);
 private:
-	typedef std::map<const std::string, SignalBase*> Signals;
+	typedef boost::unordered_map<const std::string, SignalBase*> Signals;
 	typedef std::set<std::string> BlockedNamespaces;
 
 	Signals signals;

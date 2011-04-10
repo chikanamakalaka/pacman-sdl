@@ -68,7 +68,7 @@ public:
 	}
 	boost::shared_ptr<SceneGraph> CreateSceneGraph(const std::string& name){
 		if(scenegraphs.find(name)==scenegraphs.end()){
-			boost::shared_ptr<SceneGraph> scenegraph(new SceneGraph());
+			boost::shared_ptr<SceneGraph> scenegraph(new SceneGraph(name));
 			scenegraphs.insert(SceneGraphs_Tp::value_type(name, boost::shared_ptr<SceneGraph>(scenegraph)));
 			if(selectedscenegraph.expired()){
 				selectedscenegraph = scenegraph;

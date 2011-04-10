@@ -31,6 +31,7 @@ public:
 			dt=SDL_GetTicks()-t;
 			t+=dt;
 			signalbroker.InvokeSignal<TickHandler>("/clock/tick", t, dt);
+			SDL_Delay(10);
 		}
 	}
 	void Stop(){

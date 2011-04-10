@@ -11,6 +11,7 @@
 #include <list>
 #include <map>
 #include <vector>
+#include <stack>
 #include <set>
 #include <iterator>
 #include <exception>
@@ -107,7 +108,7 @@ int main(int argc, char *argv[]) try{
 
 	//application specific
 	InputView inputview(signalbroker);
-	//PacmanLogic pacmanlogic(signalbroker);
+	PacmanLogic pacmanlogic(signalbroker);
 	SDLAudio sdlaudio(signalbroker);
 	PacmanGamestateLoader pacmangamestateloader(signalbroker);
 	PacmanMainMenuController pacmanmainmenucontroller(signalbroker);

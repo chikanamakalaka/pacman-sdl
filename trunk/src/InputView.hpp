@@ -31,7 +31,7 @@ private:
 	std::multimap<std::string, std::string> keydownbindings;
 	std::multimap<std::string, std::string> keyupbindings;
 	std::multimap<std::string, std::string> keyheldbindings;
-	std::map<Uint8, bool> keys;
+	std::map<int, bool> keys;
 public:
 	InputView(SignalBroker& signalbroker):
 		SignalSubscriber(signalbroker, "Pacman", "InputView"),
@@ -73,6 +73,8 @@ public:
 		keyupbindings = pacmandb.GetKeyUpBindings();
 		keydownbindings = pacmandb.GetKeyDownBindings();
 		keyheldbindings = pacmandb.GetKeyHeldBindings();
+
+
 	}
 	void KeyUp(SDL_Event event){
 		SDLInput sdlinput;
@@ -83,10 +85,15 @@ public:
 		}
 
 		boost::bimap<int,std::string>::left_map::const_iterator itr = keybindings.left.find(gcnvalue);
+
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "KeyUp:"+itr->second);
+
 		if(itr != keybindings.left.end()){
 			std::multimap<std::string, std::string>::const_iterator keyupitr = keyupbindings.find(itr->second);
 			if(keyupitr != keyupbindings.end()){
 				for(; keyupitr != keyupbindings.upper_bound(itr->second); keyupitr++){
+
+					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "invoking:"+keyupitr->second);
 					signalbroker.InvokeSignal<SignalBroker::GenericHandler>(keyupitr->second, ArgsList());
 				}
 			}
@@ -103,10 +110,16 @@ public:
 		}
 
 		boost::bimap<int,std::string>::left_map::const_iterator itr = keybindings.left.find(gcnvalue);
+
+		std::stringstream ss;
+		ss<<"KeyDown:"<<gcnvalue<<":"<<itr->second;
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", ss.str());
+
 		if(itr != keybindings.left.end()){
 			std::multimap<std::string, std::string>::const_iterator keydownitr = keydownbindings.find(itr->second);
 			if(keydownitr != keydownbindings.end()){
 				for(; keydownitr != keydownbindings.upper_bound(itr->second); keydownitr++){
+					signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", "invoking:"+keydownitr->second);
 					signalbroker.InvokeSignal<SignalBroker::GenericHandler>(keydownitr->second, ArgsList());
 				}
 			}
@@ -115,10 +128,16 @@ public:
 	}
 
 	void ApplyInput(long t, long dt){
-		std::map<Uint8, bool>::const_iterator itr = keys.begin();
-		for(;itr != keys.end(); itr++){
-			if(itr->second == true){
-				boost::bimap<int, std::string>::left_map::const_iterator itr = keybindings.left.find(itr->first);
+		std::map<int, bool>::const_iterator keyitr = keys.begin();
+		for(;keyitr != keys.end(); keyitr++){
+			if(keyitr->second == true){
+				boost::bimap<int, std::string>::left_map::const_iterator itr = keybindings.left.find(keyitr->first);
+
+
+				std::stringstream ss;
+				ss<<"KeyHeld:"<<keyitr->first<<":"<<itr->second;
+				signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", ss.str());
+
 				if(itr != keybindings.left.end()){
 					std::multimap<std::string, std::string>::const_iterator keyhelditr = keyheldbindings.find(itr->second);
 					if(keyhelditr != keyheldbindings.end()){

@@ -150,7 +150,7 @@ SceneNode& SceneNode::GetChildNodeByName(const std::string& name){
 			return **itr;
 		}
 	}
-	throw SceneNodeDoesNotExist(name.c_str());
+	throw SceneNodeDoesNotExist(name);
 }
 SceneNode::ConstSceneNodePtr SceneNode::GetChildNodePtrByName(const std::string& name)const{
 	SceneNodes::const_iterator itr = children.begin();
@@ -169,9 +169,39 @@ SceneNode::SceneNodePtr SceneNode::GetChildNodePtrByName(const std::string& name
 			return *itr;
 		}
 	}
-	throw SceneNodeDoesNotExist(name.c_str());
+	throw SceneNodeDoesNotExist(name);
 }
-const SceneNode& SceneNode::GetDescendantNodeByPath(const std::string& path)const{
+SceneNode::SceneNodePtr SceneNode::GetDescendantNodePtrByPath(const std::string& path){
+	typedef boost::tokenizer<boost::char_separator<char> >
+	    tokenizer;
+
+	//separate by slashes and spaces
+	boost::char_separator<char> sep("", "/");
+	tokenizer tokens(path, sep);
+
+	//push tokens into vector string
+	std::vector<std::string> pathelements;
+
+	for(tokenizer::iterator tokenitr=tokens.begin(); tokenitr!=tokens.end();++tokenitr){
+		pathelements.push_back(*tokenitr);
+	}
+
+	//get the child scene node by taking the first token and seaching the child nodes for it
+	SceneNodePtr next = GetChildNodePtrByName(pathelements[1]);
+	if(pathelements.size() == 2){
+		//if there aren't any more elements in the path, return the last found child node
+		return next;
+	}else{
+		//trim the first two tokens (/<token>) and join the tokens into a path
+		std::stringstream ss;
+		std::copy(++(++tokens.begin()), tokens.end(), std::ostream_iterator<std::string>(ss));
+
+		//search for the path among descendants
+		return next->GetDescendantNodePtrByPath(ss.str());
+	}
+}
+
+SceneNode::ConstSceneNodePtr SceneNode::GetDescendantNodePtrByPath(const std::string& path)const{
 	typedef boost::tokenizer<boost::char_separator<char> >
 	    tokenizer;
 	boost::char_separator<char> sep("", "/");
@@ -180,13 +210,13 @@ const SceneNode& SceneNode::GetDescendantNodeByPath(const std::string& path)cons
 	for(tokenizer::iterator tokenitr=tokens.begin(); tokenitr!=tokens.end();++(++tokenitr)){
 		pathelements.push_back(*tokenitr);
 	}
-	const SceneNode& next = GetChildNodeByName(pathelements[1]);
+	SceneNode::ConstSceneNodePtr next = GetChildNodePtrByName(pathelements[1]);
 	if(pathelements.size() == 2){
 		return next;
 	}else{
 		std::stringstream ss;
 
 		std::copy(++(++tokens.begin()), tokens.end(), std::ostream_iterator<std::string>(ss));
-		return next.GetDescendantNodeByPath(ss.str());
+		return next->GetDescendantNodePtrByPath(ss.str());
 	}
 }
