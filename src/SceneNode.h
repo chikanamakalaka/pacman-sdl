@@ -12,6 +12,8 @@
 #include <list>
 #include <string>
 #include <map>
+#include <boost/functional.hpp>
+#include <boost/unordered_map.hpp>
 #include <boost/function.hpp>
 #include <boost/signals.hpp>
 #include "Cloneable.hpp"
@@ -27,7 +29,7 @@ public:
 	}
 	virtual ~SceneNodeDoesNotExist()throw(){}
 	char const* what()const throw(){
-		return msg.c_str();
+		return ("SceneNodeDoesNotExist:"+msg).c_str();
 	}
 };
 
@@ -40,7 +42,7 @@ public:
 	typedef std::list<SceneNodePtr> SceneNodes;
 
 	typedef boost::shared_ptr<SceneNodeProperty> SceneNodePropertyPtr;
-	typedef std::map<std::string, SceneNodePropertyPtr> SceneNodeProperties;
+	typedef boost::unordered_map<std::string, SceneNodePropertyPtr> SceneNodeProperties;
 	typedef std::map<std::list<std::string>, boost::function<void(SceneNodePtr)> > SceneNodeProcessorDependencies;
 private:
 	std::string name;
@@ -94,9 +96,12 @@ public:
 
 	const SceneNode& GetChildNodeByName(const std::string& name)const;
 	SceneNode& GetChildNodeByName(const std::string& name);
+
 	ConstSceneNodePtr GetChildNodePtrByName(const std::string& name)const;
 	SceneNodePtr GetChildNodePtrByName(const std::string& name);
-	const SceneNode& GetDescendantNodeByPath(const std::string& path)const;
+
+	SceneNodePtr GetDescendantNodePtrByPath(const std::string& path);
+	ConstSceneNodePtr GetDescendantNodePtrByPath(const std::string& path)const;
 
 	//Node processing
 	void ProcessNode(const std::string& name);

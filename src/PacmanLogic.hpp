@@ -42,6 +42,9 @@ private:
 	SceneNodePtr pinky;
 	SceneNodePtr clyde;
 
+	std::vector<int> pacmanposition;
+
+
 	std::vector<SceneNodePtr> dots;
 	std::vector<SceneNodePtr> powerups;
 
@@ -50,6 +53,8 @@ private:
 	boost::uniform_int<> seven;
 	boost::variate_generator<boost::mt19937&, boost::uniform_int<> > die;
 
+	static const float pxpersec = 16.0f;
+
 
 public:
 	PacmanLogic(SignalBroker& signalbroker):
@@ -57,6 +62,7 @@ public:
 		signalbroker(signalbroker),
 		score(0),
 		level(0),
+		pacmanposition(std::vector<int>(2)),
 		seven(0,6),
 		die(rng, seven)
 {
@@ -73,27 +79,27 @@ public:
 		(	"/logic/loadinitialstate",
 			boost::bind(&PacmanLogic::LoadInitialState, this));
 
-		SignalSubscriber::ConnectToSignal<InputView::PlayerMovementHandler>
+		SignalSubscriber::ConnectToSignal<SignalBroker::GenericHandler>
 		(	"/input/player/movedown",
-			boost::bind(&PacmanLogic::MovePlayerDown, this));
+			boost::bind(&PacmanLogic::MovePlayerDown, this, _1));
 
 
 		SignalSubscriber::ConnectToSignal
-		<InputView::PlayerMovementHandler>
+		<SignalBroker::GenericHandler>
 		(	"/input/player/moveup",
-			boost::bind(&PacmanLogic::MovePlayerUp, this));
+			boost::bind(&PacmanLogic::MovePlayerUp, this, _1));
 
 		SignalSubscriber::ConnectToSignal
-		<InputView::PlayerMovementHandler>
+		<SignalBroker::GenericHandler>
 		(	"/input/player/moveleft",
-			boost::bind(&PacmanLogic::MovePlayerLeft, this));
+			boost::bind(&PacmanLogic::MovePlayerLeft, this, _1));
 
 		SignalSubscriber::ConnectToSignal
-		<InputView::PlayerMovementHandler>
+		<SignalBroker::GenericHandler>
 		(	"/input/player/moveright",
-				boost::bind(&PacmanLogic::MovePlayerRight, this));
+				boost::bind(&PacmanLogic::MovePlayerRight, this, _1));
 
-		LoadLevel(1);
+		//LoadLevel(1);
 
 	}
 	void LoadLevel(int level){
@@ -118,22 +124,37 @@ public:
 
 	}
 	void SceneGraphLoadedFromFile(boost::shared_ptr<SceneGraph> scenegraphptr){
+		if(scenegraphptr->GetName() == "Pacman")
 		//TODO:capture characters
-		pacman = scenegraphptr->GetNodePtrByPath("/root/characters/pacman");
-		blinky = scenegraphptr->GetNodePtrByPath("/root/characters/blinky");
-		inky = scenegraphptr->GetNodePtrByPath("/root/characters/inky");
-		pinky = scenegraphptr->GetNodePtrByPath("/root/characters/pinky");
-		clyde = scenegraphptr->GetNodePtrByPath("/root/characters/clyde");
+		try{
+			pacman = scenegraphptr->GetNodePtrByPath("/level/characters/pacman");
+			blinky = scenegraphptr->GetNodePtrByPath("/level/characters/blinky");
+			inky = scenegraphptr->GetNodePtrByPath("/level/characters/inky");
+			pinky = scenegraphptr->GetNodePtrByPath("/level/characters/pinky");
+			clyde = scenegraphptr->GetNodePtrByPath("/level/characters/clyde");
 
+			pacmanposition = GetSceneNodeGridCoordinates(pacman);
+
+		}catch(SceneNodeDoesNotExist& e){
+			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", std::string(e.what()));
+			throw;
+		}
 		//TODO:capture collision grid
 		int maxx = 0;
 		int maxy = 0;
 
 
 		//get the level's collision map
-		SceneNodePtr level = scenegraphptr->GetNodePtrByPath("/root/level");
-		if(level->HasSceneNodeProperty("pacmanlogicdata")){
-			collisionmap.assign_temporary(level->GetSceneNodeProperty<PacmanLogicDataProperty>("pacmanlogicdata").GetCollisionMap());
+		try{
+			SceneNodePtr level = scenegraphptr->GetNodePtrByPath("/level");
+			if(level->HasSceneNodeProperty("pacmanlogicdata")){
+				const boost::numeric::ublas::matrix<bool>& collisionmap = level->GetSceneNodeProperty<PacmanLogicDataProperty>("pacmanlogicdata").GetCollisionMap();
+				this->collisionmap.resize(collisionmap.size1(), collisionmap.size2());
+				this->collisionmap = collisionmap;
+			}
+		}catch(SceneNodeDoesNotExist e){
+			signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", std::string(e.what()));
+			throw;
 		}
 
 		//TODO:capture fruit
@@ -141,10 +162,10 @@ public:
 		//TODO:capture powerups
 		//TODO:capture eyes
 
-			//Process logic at appropriate interval
-			signalbroker.InvokeSignal<TimerView::IntervalHandler>(
-					"/timer/setinterval",
-					"/pacmanlogic/processlogic", boost::bind(&PacmanLogic::ProcessLogic, this, _1, _2), 100);
+		//Process logic at appropriate interval
+		signalbroker.InvokeSignal<TimerView::IntervalHandler>(
+			"/timer/setinterval",
+			"/pacmanlogic/processlogic", boost::bind(&PacmanLogic::ProcessLogic, this, _1, _2), 100);
 
 	}
 
@@ -166,25 +187,65 @@ public:
 		//SetUpNextPeice();
 	}
 
-	void MovePlayerDown(){
-		if(levelloaded){
-			signalbroker.InvokeSignal<TimerView::UpdateIntervalLengthHandler>("/timer/updateinterval", "/pacmanlogic/processlogic", IntervalPerLevel(level+6));
+	void MovePlayerDown(const ArgsList& args){
+		const std::vector<boost::any> values = args.GetValues();
+		float t = boost::any_cast<long>(values[0])/1000.0f;
+		float dt = boost::any_cast<long>(values[1])/1000.0f;
+		if(pacman){
+			std::vector<int> position = pacmanposition;
+			position[1]+=dt;
+			if(CanMoveToPosition(position)){
+				PositionProperty& pacmanposition = pacman->GetSceneNodeProperty<PositionProperty>("position");
+				Matrix4& mpacman = pacmanposition.GetPosition();
+				mpacman(1,3)+=pxpersec * dt;
+				this->pacmanposition = position;
+			}
 		}
 	}
-	void MovePlayerUp(){
-		if(levelloaded){
-			signalbroker.InvokeSignal<TimerView::UpdateIntervalLengthHandler>("/timer/updateinterval", "/pacmanlogic/processlogic", IntervalPerLevel(level));
+	void MovePlayerUp(const ArgsList& args){
+		const std::vector<boost::any> values = args.GetValues();
+		float t = boost::any_cast<long>(values[0])/1000.0f;
+		float dt = boost::any_cast<long>(values[1])/1000.0f;
+		if(pacman){
+			std::vector<int> position = pacmanposition;
+			position[1]-=dt;
+			if(CanMoveToPosition(position)){
+				PositionProperty& pacmanposition = pacman->GetSceneNodeProperty<PositionProperty>("position");
+				Matrix4& mpacman = pacmanposition.GetPosition();
+				mpacman(1,3)-=pxpersec * dt;
+				this->pacmanposition = position;
+			}
 		}
 	}
 
-	void MovePlayerLeft(){
-		if(levelloaded){
-
+	void MovePlayerLeft(const ArgsList& args){
+		const std::vector<boost::any> values = args.GetValues();
+		float t = boost::any_cast<long>(values[0])/1000.0f;
+		float dt = boost::any_cast<long>(values[1])/1000.0f;
+		if(pacman){
+			std::vector<int> position = pacmanposition;
+			position[0]-=dt;
+			if(CanMoveToPosition(position)){
+				PositionProperty& pacmanposition = pacman->GetSceneNodeProperty<PositionProperty>("position");
+				Matrix4& mpacman = pacmanposition.GetPosition();
+				mpacman(0,3)-=pxpersec * dt;
+				this->pacmanposition = position;
+			}
 		}
 	}
-	void MovePlayerRight(){
-		if(levelloaded){
-
+	void MovePlayerRight(const ArgsList& args){
+		const std::vector<boost::any> values = args.GetValues();
+		float t = boost::any_cast<long>(values[0])/1000.0f;
+		float dt = boost::any_cast<long>(values[1])/1000.0f;
+		if(pacman){
+			std::vector<int> position = pacmanposition;
+			position[0]+=dt;
+			if(CanMoveToPosition(position)){
+				PositionProperty& pacmanposition = pacman->GetSceneNodeProperty<PositionProperty>("position");
+				Matrix4& mpacman = pacmanposition.GetPosition();
+				mpacman(0,3)+=pxpersec * dt;
+				this->pacmanposition = position;
+			}
 		}
 	}
 protected:
@@ -240,10 +301,36 @@ protected:
 		signalbroker.InvokeSignal<TimerView::UpdateIntervalLengthHandler>("/timer/updateinterval", "/pacmanlogic/processlogic", IntervalPerLevel(level));
 	}
 
-	bool CanMoveToPosition(int x, int y)const{
-		
-		return true;
+	bool CanMoveToPosition(const std::vector<int> position)const{
+		return CanMoveToPosition(position[0], position[1]);
 	}
+
+	bool CanMoveToPosition(int x, int y)const{
+		std::stringstream ss;
+		ss<<"rows:"<<collisionmap.size1()<<" cols:"<<collisionmap.size2()<<" x:"<<x<<" y:"<<y<<std::endl;
+		//for each row
+		for(int i=0; i<collisionmap.size1(); i++){
+			//for each column
+			for(int j=0; j<collisionmap.size2(); j++){
+				if(i==y/16 && j==x/16){
+					ss<<"p";
+				}else if(collisionmap(i, j)){
+					ss<<"x";
+				}else{
+					ss<<"-";
+				}
+			}
+			ss<<std::endl;
+		}
+		signalbroker.InvokeSignal<OutputStreamView::LogHandler>("/log/output", ss.str());
+
+		if(y<collisionmap.size1() && x<collisionmap.size2()){
+			return !collisionmap(y/16, x/16);
+		} else {
+			return true;
+		}
+	}
+
 	void IncrementScore(int rowscleared){
 		if(rowscleared>0){
 			score+=rowscleared*std::pow(1.5, level)*100;
@@ -288,6 +375,16 @@ protected:
 			return (int)std::floor(t);
 		}*/
 		return static_cast<int>(t);
+	}
+	std::vector<int> GetSceneNodeGridCoordinates(SceneNodePtr scenenodeptr)const{
+		std::vector<int> result(2);
+		if(scenenodeptr){
+			const PositionProperty& position = scenenodeptr->GetSceneNodeProperty<PositionProperty>("position");
+			const Matrix4& m = position.GetPosition();
+			result[0] = m(0,3);
+			result[1] = m(1,3);
+		}
+		return result;
 	}
 };
 
